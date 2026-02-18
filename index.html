@@ -15,9 +15,18 @@
             color: white;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
-        /* Шапка с использованием изображения */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
         .header-bg {
             background: url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/bg.png') no-repeat center center;
             background-size: cover;
@@ -46,7 +55,6 @@
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
-            overflow-x: auto;
         }
 
         table {
@@ -56,12 +64,12 @@
             table-layout: fixed;
         }
 
-        /* Шапка таблицы с неделями */
         .week-cell {
             background: url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/week.png') no-repeat center center;
             background-size: 100% 100%;
             padding: 15px 5px;
             text-align: center;
+            color: black;
         }
 
         .week-name {
@@ -79,7 +87,6 @@
             margin-top: 2px;
         }
 
-        /* Первый столбец с категориями */
         .category-cell {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
@@ -90,56 +97,82 @@
             width: 200px;
         }
 
-        /* Ячейки контента и карточки */
         .content-cell {
             position: relative;
-            height: 80px;
+            height: 100px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
         }
 
+        /* Обновленный стиль баннера: округлый контур и цвет #39527A */
         .supply-card {
-            background: url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/supply.png') no-repeat center center;
-            background-size: 100% 100%;
-            height: 100%;
+            border: 5px solid rgba(57, 82, 122);
+            height: 90%;
+            margin: 2px 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 5px 15px;
+            flex-direction: row; 
+            padding: 10px 15px;
             position: absolute;
             top: 0;
             left: 0;
             z-index: 10;
-            border-radius: 4px;
+            border-radius: 12px; /* Округлый контур */
+            overflow: hidden; 
         }
 
-        .supply-content {
+        .supply-assets {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-align: center;
-            width: 100%;
-            justify-content: center;
+            align-items: flex-end;
+            gap: 2px;
+            height: 100%;
+            margin-right: 5px;
+            flex-shrink: 0;
         }
 
-        .supply-icon {
-            width: 32px;
-            height: 32px;
+        .mini-icons-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        .mini-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            background: rgba(0,0,0,0.3);
+            border-radius: 2px;
+        }
+
+        .main-icon {
+            width: 60px;
+            height: 60px;
             object-fit: contain;
             background: rgba(0,0,0,0.2);
             border-radius: 4px;
         }
 
-        /* Классы для динамического расчета ширины (через JS) */
+        .supply-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: left;
+            flex: 1;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
 
     <header class="header-bg">
         <h1 class="header-title">РАСПИСАНИЕ ПОСТАВОК</h1>
-        <p class="header-subtitle">Основан на расписании китайских серверов</p>
+        <p class="header-subtitle">Основано на расписании китайских серверов</p>
     </header>
 
     <main class="table-container">
@@ -147,17 +180,15 @@
             <thead>
                 <tr id="weeksHeader">
                     <th style="width: 200px;"></th>
-                    <!-- Недели будут сгенерированы JS -->
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Категории и контент будут сгенерированы JS -->
+                <!-- Генерируется через JS -->
             </tbody>
         </table>
     </main>
 
     <script>
-        // Настройки расписания
         const totalWeeks = 8;
         const categories = [
             "Боевой костюм А",
@@ -170,31 +201,37 @@
             "Карнавал Б"
         ];
 
-        // Даты недель
         const weekDates = [
             "5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр",
-            "3-10 апрель", "10-17 апрель", "17-24 апрель", "24-30 апрель"
+            "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"
         ];
 
-        // ДАННЫЕ ПОСТАВОК
-        // startWeek: 1-8
-        // duration: сколько недель занимает
         const supplyData = {
             "Боевой костюм А": [
-                { title: "Усмиряющий клинок возвещает о рассвете", startWeek: 1, duration: 6, icon: "" }
+                { 
+                    title: "Усмиряющий клинок возвещает о рассвете", 
+                    startWeek: 1, 
+                    duration: 6, 
+                    icons: { main: "", rank: "", type: "", damage: "" } 
+                }
             ],
             "Боевой костюм Б": [
-                { title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icon: "" }
+                { 
+                    title: "Привет♪ Фея желаний любви♥️", 
+                    startWeek: 4, 
+                    duration: 3,
+                    icons: { main: "", rank: "", type: "", damage: "" }
+                }
             ],
             "Экипировка А": [
-                { title: "Signature Gear Set", startWeek: 1, duration: 6, icon: "" }
+                { title: "Signature Gear Set", startWeek: 1, duration: 6, icons: {} }
             ],
             "Наряд": [
-                { title: "Summer Outfit", startWeek: 2, duration: 1, icon: "" },
-                { title: "Epic Skin", startWeek: 5, duration: 1, icon: "" }
+                { title: "Summer Outfit", startWeek: 2, duration: 1, icons: {} },
+                { title: "Epic Skin", startWeek: 5, duration: 1, icons: {} }
             ],
             "Карнавал А": [
-                { title: "SPRING FESTIVAL EVENT", startWeek: 1, duration: 8, icon: "" }
+                { title: "SPRING FESTIVAL EVENT", startWeek: 1, duration: 8, icons: {} }
             ]
         };
 
@@ -202,7 +239,6 @@
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
 
-            // Рендер шапки недель
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
@@ -213,27 +249,21 @@
                 headerRow.appendChild(th);
             }
 
-            // Рендер строк категорий
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
-                
-                // Название категории
                 const catTd = document.createElement('td');
                 catTd.className = 'category-cell';
                 catTd.innerText = cat;
                 tr.appendChild(catTd);
 
-                // Создаем 8 пустых ячеек для сетки
                 for (let i = 1; i <= totalWeeks; i++) {
                     const td = document.createElement('td');
                     td.className = 'content-cell';
                     td.id = `cell-${cat}-${i}`;
                     tr.appendChild(td);
                 }
-
                 tbody.appendChild(tr);
 
-                // Размещаем баннеры из данных
                 if (supplyData[cat]) {
                     supplyData[cat].forEach(item => {
                         const targetCell = tr.querySelector(`#cell-${CSS.escape(cat)}-${item.startWeek}`);
@@ -241,14 +271,23 @@
                             const card = document.createElement('div');
                             card.className = 'supply-card';
                             
-                            // Расчет ширины: (количество недель * 100%) + (отступы между ячейками)
                             const widthPercent = item.duration * 100;
-                            const spacing = (item.duration - 1) * 4; // 4px это border-spacing
-                            card.style.width = `calc(${widthPercent}% + ${spacing}px)`;
+                            const spacing = (item.duration - 1) * 4; 
+                            card.style.width = `calc(${widthPercent}% + ${spacing}px - 4px)`;
+                            card.style.left = "2px";
+
+                            const icons = item.icons || {};
                             
                             card.innerHTML = `
+                                <div class="supply-assets">
+                                    <div class="mini-icons-stack">
+                                        ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div class="mini-icon"></div>'}
+                                        ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div class="mini-icon"></div>'}
+                                        ${icons.damage ? `<img src="${icons.damage}" class="mini-icon">` : '<div class="mini-icon"></div>'}
+                                    </div>
+                                    ${icons.main ? `<img src="${icons.main}" class="main-icon">` : '<div class="main-icon"></div>'}
+                                </div>
                                 <div class="supply-content">
-                                    ${item.icon ? `<img src="${item.icon}" class="supply-icon">` : '<span class="supply-icon"></span>'}
                                     <span>${item.title}</span>
                                 </div>
                             `;
