@@ -21,7 +21,7 @@
         .header-bg {
             background: url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/bg.png') no-repeat center center;
             background-size: cover;
-            height: 250px;
+            height: 150px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -31,7 +31,7 @@
 
         .header-title {
             font-size: 3.5rem;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: 0.1em;
             margin: 0;
         }
@@ -172,25 +172,22 @@
 
         // Даты недель
         const weekDates = [
-            "3 мар - 4 апр", "5 апр - 11 апр", "12 апр - 18 апр", "19 апр - 25 апр",
-            "26 апр - 2 мая", "3 мая - 9 мая", "10 мая - 16 мая", "17 мая - 23 мая"
+            "5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр",
+            "3-10 апрель", "10-17 апрель", "17-24 апрель", "24-30 апрель"
         ];
 
-        // ДАННЫЕ ПОСТАВОК (Здесь вы настраиваете всё)
+        // ДАННЫЕ ПОСТАВОК
         // startWeek: 1-8
         // duration: сколько недель занимает
         const supplyData = {
             "Боевой костюм А": [
-                { title: "S-Rank Valkyrie X", startWeek: 1, duration: 3, icon: "" },
-                { title: "New Battlesuit Y", startWeek: 4, duration: 5, icon: "" }
+                { title: "Усмиряющий клинок возвещает о рассвете", startWeek: 1, duration: 6, icon: "" }
             ],
             "Боевой костюм Б": [
-                { title: "ADV Supply", startWeek: 2, duration: 2, icon: "" },
-                { title: "Starter Special", startWeek: 7, duration: 2, icon: "" }
+                { title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icon: "" }
             ],
             "Экипировка А": [
-                { title: "Signature Gear Set", startWeek: 1, duration: 3, icon: "" },
-                { title: "Universal Pack", startWeek: 4, duration: 5, icon: "" }
+                { title: "Signature Gear Set", startWeek: 1, duration: 6, icon: "" }
             ],
             "Наряд": [
                 { title: "Summer Outfit", startWeek: 2, duration: 1, icon: "" },
