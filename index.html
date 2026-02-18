@@ -40,32 +40,35 @@
             font-size: 3.5rem;
             font-weight: 700;
             letter-spacing: 0.1em;
+            color: white;
         }
 
         .header-subtitle {
             font-size: 1.2rem;
             opacity: 0.9;
             margin-bottom: 10px;
+            color: white;
         }
 
         .table-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 40px auto;
             padding: 20px;
-            background: linear-gradient(to right, purple, pink);
+            background: linear-gradient(to right, #581153, #9d1c8c);
             border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 6px;
+            border-spacing: 8px;
             table-layout: fixed;
             background: transparent;
         }
 
         .week-cell {
-            background: #581153;
+            background: #400d3c;
             padding: 12px 5px;
             text-align: center;
             color: white;
@@ -100,56 +103,58 @@
 
         .content-cell {
             position: relative;
-            height: 85px;
+            height: 100px;
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .supply-card {
             background: #F5E9F4;
             backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            height: 90%;
-            margin: auto 0;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            height: 85px;
             display: flex;
             align-items: center;
             flex-direction: row; 
             position: absolute;
-            top: 5%;
-            z-index: 5;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
             border-radius: 10px;
             overflow: hidden;
-            transition: background 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            /* Переход для плавности при ресайзе */
+            transition: width 0.2s ease, left 0.2s ease;
         }
 
         .supply-assets {
             display: flex;
-            align-items: flex-end;
-            gap: 2px;
+            align-items: center;
+            gap: 4px;
             height: 100%;
-            margin-right: 8px;
+            padding: 6px;
             flex-shrink: 0;
-            padding: 4px;
         }
 
         .mini-icons-stack {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
             justify-content: center;
         }
 
         .mini-icon {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             object-fit: contain;
         }
 
         .main-icon {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            border-radius: 4px;
+            width: 74px;
+            height: 74px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #ddd;
         }
 
         .supply-content {
@@ -157,12 +162,12 @@
             flex-direction: column;
             justify-content: center;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             text-align: left;
-            color: black;
+            color: #2d0a2a;
             flex: 1;
-            line-height: 1.2;
-            padding-right: 12px;
+            line-height: 1.1;
+            padding: 0 10px 0 4px;
             overflow: hidden;
         }
         
@@ -189,7 +194,7 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Генерируется через JS -->
+                <!-- Сгенерировано JS -->
             </tbody>
         </table>
     </main>
@@ -217,17 +222,21 @@
                     title: "Усмиряющий клинок возвещает о рассвете", 
                     startWeek: 1, 
                     duration: 6, 
-                    icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } 
+                    icons: { 
+                        main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", 
+                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", 
+                        type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" 
+                    } 
                 }
             ],
             "Боевой костюм Б": [
                 { 
                     title: "Привет♪ Фея желаний любви♥️", 
                     startWeek: 4, 
-                    duration: 3,
+                    duration: 3, 
                     icons: { 
                         main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", 
-                        rank: "images/Valkyrie_S.png",
+                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png",
                         type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png"
                     }
                 }
@@ -256,10 +265,11 @@
             ],
         };
 
-        function renderTable() {
+        function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
 
+            // Создаем заголовки недель
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
@@ -270,6 +280,7 @@
                 headerRow.appendChild(th);
             }
 
+            // Создаем строки категорий
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
                 const catTd = document.createElement('td');
@@ -283,45 +294,64 @@
                     td.id = `cell-${cat}-${i}`;
                     tr.appendChild(td);
                 }
-
                 tbody.appendChild(tr);
+            });
 
-                if (supplyData[cat]) {
-                    supplyData[cat].forEach(item => {
-                        const targetCell = tr.querySelector(`#cell-${CSS.escape(cat)}-${item.startWeek}`);
-                        if (targetCell) {
-                            const card = document.createElement('div');
-                            card.className = 'supply-card';
-                            
-                            const marginX = 4;
-                            const widthPercent = item.duration * 100;
-                            const spacingTotal = (item.duration - 1) * 6; 
-                            
-                            card.style.width = `calc(${widthPercent}% + ${spacingTotal}px - ${marginX * 2}px)`;
-                            card.style.left = `${marginX}px`;
-                            
-                            const icons = item.icons || {};
-                            
-                            card.innerHTML = `
-                                <div class="supply-assets">
-                                    <div class="mini-icons-stack">
-                                        ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div style="height:24px"></div>'}
-                                        ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div style="height:24px"></div>'}
-                                    </div>
-                                    ${icons.main ? `<img src="${icons.main}" class="main-icon">` : '<div style="width:70px"></div>'}
+            // Ждем отрисовки DOM, затем рисуем баннеры
+            setTimeout(renderBanners, 50);
+        }
+
+        function renderBanners() {
+            // Удаляем старые баннеры, если они были
+            document.querySelectorAll('.supply-card').forEach(el => el.remove());
+
+            categories.forEach(cat => {
+                if (!supplyData[cat]) return;
+
+                supplyData[cat].forEach(item => {
+                    const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
+                    const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
+                    const endCell = document.getElementById(`cell-${cat}-${endWeekNum}`);
+
+                    if (startCell && endCell) {
+                        const card = document.createElement('div');
+                        card.className = 'supply-card';
+                        
+                        // Внутренний визуальный отступ для пробелов между баннерами
+                        const visualPadding = 4; 
+
+                        // Вычисляем точные координаты в пикселях
+                        const startRect = startCell.getBoundingClientRect();
+                        const endRect = endCell.getBoundingClientRect();
+                        const parentRect = startCell.getBoundingClientRect();
+
+                        // Ширина = Конец последней ячейки минус Начало первой ячейки
+                        const totalWidthPx = endRect.right - startRect.left;
+                        
+                        card.style.width = `${totalWidthPx - (visualPadding * 2)}px`;
+                        card.style.left = `${visualPadding}px`;
+                        
+                        const icons = item.icons || {};
+                        card.innerHTML = `
+                            <div class="supply-assets">
+                                <div class="mini-icons-stack">
+                                    ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div style="height:22px"></div>'}
+                                    ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div style="height:22px"></div>'}
                                 </div>
-                                <div class="supply-content">
-                                    <span>${item.title}</span>
-                                </div>
-                            `;
-                            targetCell.appendChild(card);
-                        }
-                    });
-                }
+                                ${icons.main ? `<img src="${icons.main}" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
+                            </div>
+                            <div class="supply-content">
+                                <span>${item.title}</span>
+                            </div>
+                        `;
+                        startCell.appendChild(card);
+                    }
+                });
             });
         }
 
-        window.onload = renderTable;
+        window.onload = initTable;
+        window.onresize = renderBanners; // Пересчитываем при изменении размера окна
     </script>
 </body>
 </html>
