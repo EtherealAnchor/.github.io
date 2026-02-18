@@ -49,7 +49,7 @@
         }
 
         .table-container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 40px auto;
             padding: 20px;
             background: linear-gradient(to right, purple, pink);
@@ -116,7 +116,6 @@
             flex-direction: row; 
             position: absolute;
             top: 5%;
-            left: 0;
             z-index: 5;
             border-radius: 10px;
             overflow: hidden;
@@ -253,7 +252,7 @@
             ],
             "Наряд": [
                 { title: "Наряд Феи Эли", startWeek: 2, duration: 3, icons: {} },
-            { title: "Молитвы зимы, новые мечтания", startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
+                { title: "Молитвы зимы, новые мечтания", startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
 
@@ -294,10 +293,13 @@
                             const card = document.createElement('div');
                             card.className = 'supply-card';
                             
+                            const marginX = 4;
                             const widthPercent = item.duration * 100;
-                            const spacing = (item.duration - 1) * 6; 
-                            card.style.width = `calc(${widthPercent}% + ${spacing}px - 6px)`;
-                            card.style.left = "3px";
+                            const spacingTotal = (item.duration - 1) * 6; 
+                            
+                            card.style.width = `calc(${widthPercent}% + ${spacingTotal}px - ${marginX * 2}px)`;
+                            card.style.left = `${marginX}px`;
+                            
                             const icons = item.icons || {};
                             
                             card.innerHTML = `
