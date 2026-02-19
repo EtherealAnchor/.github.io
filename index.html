@@ -78,12 +78,14 @@
             display: block;
         }
 
+
         .table-container {
             max-width: 1600px;
             margin: 20px auto;
             padding: 20px;
             background: linear-gradient(to right, purple, pink);
             border-radius: 16px;
+            overflow-x: auto;
         }
 
         table {
@@ -92,6 +94,7 @@
             border-spacing: 8px;
             table-layout: fixed;
             background: transparent;
+            min-width: 1200px;
         }
 
         .week-cell {
@@ -207,7 +210,7 @@
 
     <nav class="nav-container">
         <button id="nav-schedule" class="nav-button active" onclick="switchTab('schedule')">Расписание</button>
-        <button id="nav-bosses" class="nav-button" onclick="switchTab('bosses')">Боссы</button>
+        <a href="enemies.html" class="nav-button">Боссы</a>
         <a href="er.html" class="nav-button">Царство Элизиума</a>
         <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">📸 Создать скриншот</button>
     </nav>
@@ -225,11 +228,6 @@
         </main>
     </section>
 
-    <section id="bosses-page" class="page-section">
-        <div class="table-container text-center py-10">
-            <h2 class="text-2xl font-bold">Страница боссов в разработке</h2>
-        </div>
-    </section>
 
     <script>
         const totalWeeks = 8;
@@ -308,9 +306,14 @@
                         const visualPadding = 4; 
                         const startRect = startCell.getBoundingClientRect();
                         const endRect = endCell.getBoundingClientRect();
-                        const totalWidthPx = endRect.right - startRect.left;
+                        
+                        const leftPos = startCell.offsetLeft;
+                        const rightPos = endCell.offsetLeft + endCell.offsetWidth;
+                        const totalWidthPx = rightPos - leftPos;
+                        
                         card.style.width = `${totalWidthPx - (visualPadding * 2)}px`;
                         card.style.left = `${visualPadding}px`;
+                        
                         const icons = item.icons || {};
                         card.innerHTML = `
                             <div class="supply-assets">
@@ -338,22 +341,29 @@
             btn.disabled = true;
 
             try {
-
                 if(document.activeElement) document.activeElement.blur();
-
+                
                 await document.fonts.ready;
                 await new Promise(r => setTimeout(r, 600));
+
+                const fullWidth = node.scrollWidth;
+                const fullHeight = node.scrollHeight;
 
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
+                    width: fullWidth,
+                    height: fullHeight,
                     fontEmbedCSS: '',
-                    skipFonts: true, 
-                    cacheBust: true, 
-                    imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", 
+                    skipFonts: true,
+                    cacheBust: true,
+                    imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
                     style: {
                         transform: 'scale(1)',
-                        transformOrigin: 'top left'
+                        transformOrigin: 'top left',
+                        margin: '0',
+                        padding: '20px',
+                        overflow: 'visible' 
                     }
                 };
 
@@ -362,28 +372,15 @@
 
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.download = `Schedule_${Date.now()}.png`;
+                link.download = `Full_Schedule_${Date.now()}.png`;
                 link.href = url;
                 link.click();
                 
-                // Очистка ресурсов
                 setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-                
                 btn.innerText = originalText;
             } catch (error) {
-                console.error('Export Error Detail:', error);
-                
-                try {
-                    const dataUrl = await window.htmlToImage.toPng(node, { pixelRatio: 1, skipFonts: true });
-                    const link = document.createElement('a');
-                    link.download = `Schedule_Fallback_${Date.now()}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                    btn.innerText = originalText;
-                } catch (fallbackError) {
-                    console.error('Fallback failed:', fallbackError);
-                    btn.innerText = "❌ Ошибка браузера";
-                }
+                console.error('Export Error:', error);
+                btn.innerText = "❌ Ошибка";
             } finally {
                 btn.disabled = false;
             }
