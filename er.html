@@ -65,7 +65,6 @@
             border: 1px solid var(--border-color);
             position: relative;
             box-sizing: border-box;
-            /* Стабилизация шрифта */
             font-variant-ligatures: none;
             font-feature-settings: "kern" 0;
             letter-spacing: 0px !important;
@@ -74,7 +73,7 @@
 
         .header-section {
             display: grid;
-            grid-template-columns: 110px 1fr;
+            grid-template-columns: 210px 1fr;
             gap: 30px;
             margin-bottom: 30px;
             border-bottom: 2px solid var(--accent-gold);
@@ -116,6 +115,7 @@
             background: rgba(22, 18, 16, 0.95);
             border: 1px solid var(--border-color);
             padding: 20px;
+            height: 100%;
         }
 
         .card-title {
@@ -129,9 +129,10 @@
             padding-bottom: 10px;
         }
 
+        /* Перенастройка сетки для расширения правой части */
         .grid-main {
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
+            grid-template-columns: 1fr 1.8fr; 
             gap: 25px;
             margin-bottom: 25px;
         }
@@ -181,10 +182,26 @@
         .control-btn:hover { background: var(--accent-gold); color: #1a1412; }
         .export-btn { background: #27ae60; color: white; border-color: #2ecc71; }
 
-        table { width: 100%; border-collapse: collapse; }
-        table th, table td { border: 1px solid var(--border-color); padding: 12px 8px; font-size: 0.85rem; text-align: center; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        table th, table td { border: 1px solid var(--border-color); padding: 12px 6px; font-size: 0.85rem; text-align: center; overflow: hidden; }
         
-        .item-icon { width: 50px; height: 50px; border: 1px solid var(--accent-gold); margin: 0 auto; }
+        /* Фиксированная ширина для первого столбца таблицы */
+        table td:first-child { width: 140px; white-space: nowrap; }
+
+        .item-icon { 
+            width: 54px; 
+            height: 54px; 
+            border: 1px solid var(--accent-gold); 
+            background: #1a1412;
+            object-fit: contain;
+        }
+
+        .support-icons-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
 
         [contenteditable="true"]:focus { outline: none; background: rgba(255,255,255,0.05); }
 
@@ -217,6 +234,7 @@
         </div>
 
         <div class="grid-main">
+            <!-- Слева: Эксклюзивы -->
             <div class="card">
                 <div class="card-title" contenteditable="true">Эксклюзивное усиление</div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Sleight</div> <span class="tag" contenteditable="true">С</span></div>
@@ -224,29 +242,45 @@
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Reversal</div> <span class="tag" contenteditable="true">Н</span></div>
             </div>
 
+            <!-- Справа: Подготовка (Теперь шире) -->
             <div class="card">
                 <div class="card-title" contenteditable="true">Подготовка</div>
                 <table>
                     <thead>
                         <tr class="text-yellow-600">
-                            <th contenteditable="true">Этажи</th>
-                            <th contenteditable="true">1 - 8</th>
-                            <th contenteditable="true">9 - 16</th>
-                            <th contenteditable="true">17 - 18</th>
+                            <th style="width: 140px;"></th>
+                            <th contenteditable="true">1 - 8 эт.</th>
+                            <th contenteditable="true">9 - 16 эт.</th>
+                            <th contenteditable="true">17 - 18 эт.</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="font-bold uppercase" contenteditable="true">Символ памяти</td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/ba/Mad_King%27s_Mask.png" class="item-icon"></img></div></td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/12/Rainbow_of_Absence.png" class="item-icon"></img></div></td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/ff/Tin_Flask.png" class="item-icon"></img></div></td>
+                            <td class="font-bold uppercase text-left" contenteditable="true">Символ памяти</td>
+                            <td><div class="support-icons-container"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/ba/Mad_King%27s_Mask.png" class="item-icon" alt="Mask"></div></td>
+                            <td><div class="support-icons-container"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/12/Rainbow_of_Absence.png" class="item-icon" alt="Rainbow"></div></td>
+                            <td><div class="support-icons-container"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/ff/Tin_Flask.png" class="item-icon" alt="Flask"></div></td>
                         </tr>
                         <tr>
-                            <td class="font-bold uppercase" contenteditable="true">Поддержка</td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon"></img><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/38/Snowy_Sniper_%28Icon%29.png" class="item-icon"></img></div></td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon"></img><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/38/Snowy_Sniper_%28Icon%29.png" class="item-icon"></img></div></td>
-                            <td><div class="flex justify-center gap-1"><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon"></img><img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/eb/Starlit_Astrologos_%28Icon%29.png" class="item-icon"></img></div></td>
+                            <td class="font-bold uppercase text-left" contenteditable="true">Поддержка</td>
+                            <td>
+                                <div class="support-icons-container">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon" alt="BR">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/38/Snowy_Sniper_%28Icon%29.png" class="item-icon" alt="SS">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="support-icons-container">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon" alt="BR">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/38/Snowy_Sniper_%28Icon%29.png" class="item-icon" alt="SS">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="support-icons-container">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Blood_Rose_%28Icon%29.png" class="item-icon" alt="BR">
+                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/eb/Starlit_Astrologos_%28Icon%29.png" class="item-icon" alt="SA">
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -348,7 +382,7 @@
                 });
 
                 const link = document.createElement('a');
-                link.download = `ER_Build_Full_${Date.now()}.png`;
+                link.download = `ER_Build_${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
                 
