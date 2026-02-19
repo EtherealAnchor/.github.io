@@ -14,9 +14,14 @@
             --bg-color: #1a1412;
             --card-bg: #2a221f;
             --accent-gold: #d4af37;
-            --accent-purple: #8e44ad;
             --text-light: #e0d5c1;
             --border-color: #43382f;
+            
+            --color-s: #9b59b6;
+            --color-o: #e74c3c;
+            --color-p: #f39c12;
+            --color-n: #7f8c8d;
+            --color-core: #1abc9c;
         }
 
         body {
@@ -59,15 +64,15 @@
         }
 
         #capture-area {
-            max-width: 1240px;
-            width: 1240px; /* Фиксируем ширину для стабильности скриншота */
+            width: 1240px;
             margin: 30px auto;
             padding: 30px;
-            background: rgba(42, 34, 31, 0.95); /* Увеличена непрозрачность вместо блюра */
+            background: #2a221f; 
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.7);
             position: relative;
+            box-sizing: border-box;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
         }
 
         .header-section {
@@ -83,7 +88,6 @@
             width: 110px;
             height: 110px;
             border: 2px solid var(--accent-gold);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
             object-fit: cover;
         }
 
@@ -91,41 +95,32 @@
             display: grid;
             grid-template-columns: 1.2fr 1fr;
             gap: 25px;
+            margin-bottom: 25px;
         }
 
         .dynamic-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* Фиксируем 5 колонок для скриншота */
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        /* Адаптивность только для экрана, не для скриншота */
-        @media (max-width: 1280px) {
-            .dynamic-grid {
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            }
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .card {
-            background: rgba(22, 18, 16, 0.7);
+            background: rgba(22, 18, 16, 0.8);
             border: 1px solid var(--border-color);
-            padding: 15px;
+            padding: 18px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
         }
 
         .card-title {
             color: var(--accent-gold);
             font-weight: 900;
             text-transform: uppercase;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
+            font-size: 1rem;
+            margin-bottom: 15px;
             text-align: center;
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
             padding-bottom: 8px;
-            min-height: 2.5em;
+            min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -135,39 +130,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #332a24;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .tag {
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 2px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 900;
-            min-width: 35px;
+            min-width: 40px;
             text-align: center;
             color: white;
             flex-shrink: 0;
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+            cursor: text;
         }
 
-        .tag-s { background: #9b59b6; }
-        .tag-o { background: #e74c3c; }
-        .tag-p { background: #f39c12; }
-        .tag-n { background: #7f8c8d; }
-        .tag-core { background: #1abc9c; }
+        .tag:not([data-type]) { background: #444; }
 
         .item-icon {
             width: 42px;
             height: 42px;
             background: #000;
             border: 1px solid var(--accent-gold);
-            object-fit: contain;
-        }
-
-        [contenteditable="true"]:focus {
-            outline: 1px solid var(--accent-gold);
-            background: rgba(255,255,255,0.05);
         }
 
         .legend {
@@ -175,10 +163,9 @@
             gap: 20px;
             font-size: 0.85rem;
             margin-bottom: 25px;
-            flex-wrap: wrap;
             justify-content: center;
             background: rgba(0,0,0,0.2);
-            padding: 10px;
+            padding: 12px;
         }
 
         .controls {
@@ -204,17 +191,7 @@
             font-size: 0.75rem;
             font-weight: bold;
             text-transform: uppercase;
-            transition: all 0.2s;
-        }
-
-        .control-btn:hover:not(:disabled) {
-            background: var(--accent-gold);
-            color: #1a1412;
-        }
-
-        .control-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            cursor: pointer;
         }
 
         .export-btn {
@@ -223,14 +200,12 @@
             border-color: #2ecc71;
         }
 
-        .export-btn:hover {
-            background: #2ecc71;
-            color: white;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { border: 1px solid var(--border-color); padding: 10px; font-size: 0.8rem; }
 
-        table th, table td {
-            border: 1px solid var(--border-color);
-            background: rgba(0,0,0,0.1);
+        [contenteditable="true"]:focus {
+            outline: 1px solid var(--accent-gold);
+            background: rgba(255,255,255,0.05);
         }
     </style>
 </head>
@@ -246,31 +221,25 @@
         <div class="header-section">
             <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1d/Helical_Contraption_%28Icon%29.png" class="character-portrait">
             <div class="flex-1">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h1 class="text-4xl font-black uppercase tracking-tighter" contenteditable="true">Helical Contraption</h1>
-                        <p class="text-yellow-600/80 font-bold" contenteditable="true">Рекомендованная сборка • By Teri-Teri</p>
-                    </div>
-                </div>
+                <h1 class="text-4xl font-black uppercase tracking-tighter" contenteditable="true">Усмиряющий клинок</br>возвещает о рассвете</h1>
+                <p class="text-yellow-600/80 font-bold" contenteditable="true">Рекомендованная сборка • Для Teri-Teri</p>
             </div>
         </div>
 
         <div class="legend">
-            <div class="flex items-center gap-2"><span class="tag tag-s" contenteditable="true">С</span> <span contenteditable="true">Стартовые</span></div>
-            <div class="flex items-center gap-2"><span class="tag tag-o" contenteditable="true">О</span> <span contenteditable="true">Обязательные</span></div>
-            <div class="flex items-center gap-2"><span class="tag tag-p" contenteditable="true">П</span> <span contenteditable="true">Приоритетные</span></div>
-            <div class="flex items-center gap-2"><span class="tag tag-n" contenteditable="true">Н</span> <span contenteditable="true">Необязательные</span></div>
-            <div class="flex items-center gap-2"><span class="tag tag-core" contenteditable="true">Ядро</span> <span contenteditable="true">Ядро</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-s)">С</span> <span>Стартовые</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-o)">О</span> <span>Обязательные</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-p)">П</span> <span>Приоритетные</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-n)">Н</span> <span>Необязательные</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-core)">Ядро</span> <span>Ядро</span></div>
         </div>
 
         <div class="grid-main">
             <div class="card">
-                <div class="card-title" contenteditable="true">Эксклюзивное усиление</div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Sleight</span> <span class="tag tag-s" contenteditable="true">С</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Facade</span> <span class="tag tag-s" contenteditable="true">С</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Reversal</span> <span class="tag tag-n" contenteditable="true">Н</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Transmission</span> <span class="tag tag-n" contenteditable="true">Н</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Assemblage</span> <span class="tag tag-n" contenteditable="true">Н</span></div>
+                <div class="card-title" contenteditable="true">Эксклюзивы</div>
+                <div class="buff-row"><span contenteditable="true">Blessing of Sleight</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><span contenteditable="true">Blessing of Facade</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><span contenteditable="true">Blessing of Reversal</span> <span class="tag dynamic-tag" contenteditable="true">Н</span></div>
             </div>
 
             <div class="card">
@@ -335,96 +304,115 @@
         <div id="dynamicCardsContainer" class="dynamic-grid">
             <div class="card">
                 <div class="card-title" contenteditable="true">Вилл-Ви II</div>
-                <div class="buff-row"><span contenteditable="true">Act II: Pendulum</span> <span class="tag tag-o" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Act III: Conflict</span> <span class="tag tag-o" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Act V: Spider Web</span> <span class="tag tag-o" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Intermezzo</span> <span class="tag tag-core" contenteditable="true">Ядро</span></div>
+                <div class="buff-row"><span contenteditable="true">Act II: Pendulum</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span contenteditable="true">Act III: Conflict</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span contenteditable="true">Intermezzo</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
             </div>
-
             <div class="card">
                 <div class="card-title" contenteditable="true">Кевин II</div>
-                <div class="buff-row"><span contenteditable="true">Artifact of Inhibitor</span> <span class="tag tag-o" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Goblet of Giver</span> <span class="tag tag-p" contenteditable="true">П</span></div>
-                <div class="buff-row"><span contenteditable="true">Shadow of Deliverer</span> <span class="tag tag-core" contenteditable="true">Ядро</span></div>
+                <div class="buff-row"><span contenteditable="true">Artifact of Inhibitor</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span contenteditable="true">Shadow of Deliverer</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
             </div>
         </div>
     </div>
 
     <div class="controls">
         <button class="control-btn" onclick="addCard()">+ Карточка</button>
-        <button class="control-btn" id="removeBtn" onclick="removeCard()">- Удалить</button>
+        <button class="control-btn" onclick="removeCard()">- Удалить</button>
         <button class="control-btn export-btn" onclick="downloadScreenshot()">📸 Скачать скриншот</button>
     </div>
 
     <script>
-        const container = document.getElementById('dynamicCardsContainer');
-        const removeBtn = document.getElementById('removeBtn');
-
-        function updateRemoveButton() {
-            removeBtn.disabled = container.children.length === 0;
+        function updateTagColor(tag) {
+            const text = tag.innerText.trim().toUpperCase();
+            let color = '#444';
+            
+            if (text === 'С' || text === 'C') color = 'var(--color-s)';
+            else if (text === 'О' || text === 'O') color = 'var(--color-o)';
+            else if (text === 'П' || text === 'P') color = 'var(--color-p)';
+            else if (text === 'Н' || text === 'H') color = 'var(--color-n)';
+            else if (text === 'ЯДРО' || text === 'CORE') color = 'var(--color-core)';
+            
+            tag.style.backgroundColor = color;
         }
 
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                    const target = mutation.target.parentElement.classList.contains('tag') 
+                        ? mutation.target.parentElement 
+                        : mutation.target;
+                    if (target.classList && target.classList.contains('tag')) {
+                        updateTagColor(target);
+                    }
+                }
+            });
+        });
+
+        function initTagObservers() {
+            document.querySelectorAll('.dynamic-tag').forEach(tag => {
+                updateTagColor(tag);
+                observer.observe(tag, { characterData: true, childList: true, subtree: true });
+            });
+        }
+
+        const container = document.getElementById('dynamicCardsContainer');
+
         function addCard() {
-            if (container.children.length >= 5) return;
+            if (container.children.length >= 8) return;
             const newCard = document.createElement('div');
             newCard.className = 'card';
             newCard.innerHTML = `
                 <div class="card-title" contenteditable="true">Новый Набор I</div>
-                <div class="buff-row"><span contenteditable="true">Бафф А</span> <span class="tag tag-o" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Бафф Б</span> <span class="tag tag-p" contenteditable="true">П</span></div>
-                <div class="buff-row"><span contenteditable="true">Ядро</span> <span class="tag tag-core" contenteditable="true">Ядро</span></div>
+                <div class="buff-row"><span contenteditable="true">Бафф А</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span contenteditable="true">Ядро</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
             `;
             container.appendChild(newCard);
-            updateRemoveButton();
+            
+            newCard.querySelectorAll('.dynamic-tag').forEach(tag => {
+                updateTagColor(tag);
+                observer.observe(tag, { characterData: true, childList: true, subtree: true });
+            });
         }
 
         function removeCard() {
-            if (container.children.length > 0) {
-                container.removeChild(container.lastElementChild);
-            }
-            updateRemoveButton();
+            if (container.children.length > 0) container.removeChild(container.lastElementChild);
         }
 
         async function downloadScreenshot() {
             const area = document.getElementById('capture-area');
-            
             const originalShadow = area.style.boxShadow;
-            const originalWidth = area.style.width;
-            
             area.style.boxShadow = 'none';
-            area.style.width = '1240px';
 
             try {
-                await new Promise(r => setTimeout(r, 100));
-
                 const canvas = await html2canvas(area, {
                     backgroundColor: '#1a1412',
                     scale: 2,
                     useCORS: true,
-                    logging: false,
-                    width: 1240,
-                    windowWidth: 1240,
                     onclone: (clonedDoc) => {
-                        const clonedArea = clonedDoc.getElementById('capture-area');
-                        clonedArea.style.backdropFilter = 'none';
-                        clonedArea.style.background = '#2a221f';
+                        clonedDoc.querySelectorAll('.tag').forEach(tag => {
+                            const text = tag.innerText.trim().toUpperCase();
+                            if (text === 'С' || text === 'C') tag.style.backgroundColor = '#9b59b6';
+                            else if (text === 'О' || text === 'O') tag.style.backgroundColor = '#e74c3c';
+                            else if (text === 'П' || text === 'P') tag.style.backgroundColor = '#f39c12';
+                            else if (text === 'Н' || text === 'H') tag.style.backgroundColor = '#7f8c8d';
+                            else if (text === 'ЯДРО' || text === 'CORE') tag.style.backgroundColor = '#1abc9c';
+                        });
                     }
                 });
 
                 const link = document.createElement('a');
-                link.download = 'er_recommendations.png';
+                link.download = 'er_build_fixed.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             } catch (err) {
-                console.error("Ошибка при создании скриншота:", err);
+                console.error(err);
             } finally {
                 area.style.boxShadow = originalShadow;
-                area.style.width = originalWidth;
             }
         }
 
-        updateRemoveButton();
+        window.onload = initTagObservers;
     </script>
-
 </body>
 </html>
