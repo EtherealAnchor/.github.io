@@ -244,7 +244,7 @@
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                         </tr>
                         <tr>
-                            <td class="font-bold uppercase" contenteditable="true">Поддежрка</td>
+                            <td class="font-bold uppercase" contenteditable="true">Поддержка</td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
@@ -324,24 +324,32 @@
             if(document.activeElement) document.activeElement.blur();
 
             await document.fonts.ready;
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 600));
 
             try {
                 if (typeof htmlToImage === 'undefined') {
-                    throw new Error("Библиотека htmlToImage не загружена. Проверьте соединение с CDN.");
+                    throw new Error("Библиотека htmlToImage не загружена.");
                 }
+
+                const originalWidth = node.offsetWidth;
+                const originalHeight = node.scrollHeight;
 
                 const dataUrl = await htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#2a221f',
+                    width: originalWidth,
+                    height: originalHeight,
                     style: {
                         fontFamily: "'Inter', sans-serif",
-                        letterSpacing: '0px'
+                        letterSpacing: '0px',
+                        margin: '0',
+                        left: '0',
+                        top: '0'
                     }
                 });
 
                 const link = document.createElement('a');
-                link.download = `ER_Build_Elite_${Date.now()}.png`;
+                link.download = `ER_Build_Full_${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
                 
