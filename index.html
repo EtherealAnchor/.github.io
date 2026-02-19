@@ -82,7 +82,7 @@
             max-width: 1600px;
             margin: 20px auto;
             padding: 20px;
-            background: linear-gradient(to right, #4a148c, #9d1c8c);
+            background: linear-gradient(to right, purple, pink);
             border-radius: 16px;
             overflow-x: auto;
         }
@@ -234,7 +234,7 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const supplyData = {
-            "Боевой костюм А": [{ title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png" } }],
+            "Боевой костюм А": [{ title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } }],
             "Боевой костюм Б": [{ title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
             "Экипировка А": [{ title: "Экипировка новой Мэй", startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
@@ -401,18 +401,15 @@
             try {
                 if(document.activeElement) document.activeElement.blur();
                 
-                // Финальная проверка прогрузки
                 renderBanners();
                 await new Promise(r => setTimeout(r, 1000));
 
-                // Настройки для предотвращения "isTrusted: true" (Tainted Canvas)
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: '', // Отключаем встраивание шрифтов (причина ошибок безопасности)
+                    fontEmbedCSS: '',
                     skipFonts: true,
                     cacheBust: true,
-                    // Используем заглушку для битых картинок
                     imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
                     style: {
                         transform: 'scale(1)',
@@ -423,7 +420,6 @@
                     }
                 };
 
-                // Пробуем сгенерировать PNG через SVG-фильтр (более стабильно для кросс-доменных данных)
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
                 if (!dataUrl) throw new Error("Empty dataUrl");
@@ -437,7 +433,6 @@
             } catch (error) {
                 console.error('Screenshot error detail:', error);
                 btn.innerText = "❌ Ошибка безопасности";
-                // Сообщение пользователю в консоль или UI (не используем alert)
             } finally {
                 btn.disabled = false;
             }
