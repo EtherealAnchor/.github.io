@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Информационный портал</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -25,7 +26,6 @@
             scrollbar-width: none;
         }
 
-        /* Навигационная панель */
         .nav-container {
             display: flex;
             justify-content: center;
@@ -55,6 +55,19 @@
             background: #9d1c8c;
             border-color: pink;
             box-shadow: 0 0 15px rgba(157, 28, 140, 0.5);
+        }
+
+        .screenshot-button {
+            background: #27ae60;
+            color: white;
+            border-color: #2ecc71;
+        }
+        .screenshot-button:hover {
+            background: #219150;
+        }
+        .screenshot-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .page-section {
@@ -124,7 +137,6 @@
 
         .supply-card {
             background: #F5E9F4;
-            backdrop-filter: blur(8px);
             border: 2px solid rgba(255, 255, 255, 0.4);
             height: 85px;
             display: flex;
@@ -189,70 +201,45 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-
     </style>
 </head>
 <body>
 
     <nav class="nav-container">
-        <button class="nav-button active" onclick="switchTab('schedule')">Расписание</button>
-        <button class="nav-button" onclick="switchTab('bosses')">Боссы</button>
+        <button id="nav-schedule" class="nav-button active" onclick="switchTab('schedule')">Расписание</button>
+        <button id="nav-bosses" class="nav-button" onclick="switchTab('bosses')">Боссы</button>
         <a href="er.html" class="nav-button">Царство Элизиума</a>
+        <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">📸 Создать скриншот</button>
     </nav>
 
-    <!-- Секция: Расписание -->
     <section id="schedule-page" class="page-section active">
-        <main class="table-container">
+        <main class="table-container" id="capture-area">
             <table id="supplyTable">
                 <thead>
                     <tr id="weeksHeader">
                         <th style="width: 180px;"></th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    <!-- Сгенерировано JS -->
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </main>
     </section>
 
+    <section id="bosses-page" class="page-section">
+        <div class="table-container text-center py-10">
+            <h2 class="text-2xl font-bold">Страница боссов в разработке</h2>
+        </div>
+    </section>
+
     <script>
         const totalWeeks = 8;
-        const categories = [
-            "Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б",
-            "Оператор", "Наряд", "Карнавал А", "Карнавал Б"
-        ];
-        const weekDates = [
-            "5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр",
-            "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"
-        ];
+        const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
+        const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const supplyData = {
-            "Боевой костюм А": [
-                { 
-                    title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", 
-                    startWeek: 1, duration: 6, 
-                    icons: { 
-                        main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", 
-                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", 
-                        type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" 
-                    } 
-                }
-            ],
-            "Боевой костюм Б": [
-                { 
-                    title: "Привет♪ Фея желаний любви♥️", 
-                    startWeek: 4, duration: 3, 
-                    icons: { 
-                        main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", 
-                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png",
-                        type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png"
-                    }
-                }
-            ],
-            "Экипировка А": [
-                { title: "Экипировка новой Мэй", startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }
-            ],
+            "Боевой костюм А": [{ title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } }],
+            "Боевой костюм Б": [{ title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
+            "Экипировка А": [{ title: "Экипировка новой Мэй", startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
                 { title: "Экипировка Феи Элизии", startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
                 { title: "Новая экипировка Луны", startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
@@ -262,12 +249,8 @@
                 { title: "Тереза", startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
                 { title: "Серафим", startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-            "Карнавал А": [
-                { title: "Ротация: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }
-            ],
-            "Карнавал Б": [
-                { title: "Ротация экипировки: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }
-            ],
+            "Карнавал А": [{ title: "Ротация: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }],
+            "Карнавал Б": [{ title: "Ротация экипировки: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }],
             "Наряд": [
                 { title: "Наряд Феи Эли", startWeek: 2, duration: 3, icons: {} },
                 { title: "Молитвы зимы, новые мечтания", startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
@@ -277,35 +260,28 @@
         function switchTab(pageId) {
             document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            document.getElementById(pageId + '-page').classList.add('active');
-            event.target.classList.add('active');
-
-            if (pageId === 'schedule') {
-                setTimeout(renderBanners, 10);
-            }
+            const targetSection = document.getElementById(pageId + '-page');
+            const targetButton = document.getElementById('nav-' + pageId);
+            if (targetSection) targetSection.classList.add('active');
+            if (targetButton) targetButton.classList.add('active');
+            if (pageId === 'schedule') setTimeout(renderBanners, 50);
         }
 
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
-
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
-                th.innerHTML = `
-                    <span class="week-name">НЕДЕЛЯ ${i}</span>
-                    <span class="week-dates">${weekDates[i-1]}</span>
-                `;
+                th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
                 headerRow.appendChild(th);
             }
-
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
                 const catTd = document.createElement('td');
                 catTd.className = 'category-cell';
                 catTd.innerText = cat;
                 tr.appendChild(catTd);
-
                 for (let i = 1; i <= totalWeeks; i++) {
                     const td = document.createElement('td');
                     td.className = 'content-cell';
@@ -314,52 +290,103 @@
                 }
                 tbody.appendChild(tr);
             });
-
-            setTimeout(renderBanners, 50);
+            setTimeout(renderBanners, 100);
         }
 
         function renderBanners() {
             if (!document.getElementById('schedule-page').classList.contains('active')) return;
-
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
-
             categories.forEach(cat => {
                 if (!supplyData[cat]) return;
                 supplyData[cat].forEach(item => {
                     const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
                     const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
                     const endCell = document.getElementById(`cell-${cat}-${endWeekNum}`);
-
                     if (startCell && endCell) {
                         const card = document.createElement('div');
                         card.className = 'supply-card';
                         const visualPadding = 4; 
-
                         const startRect = startCell.getBoundingClientRect();
                         const endRect = endCell.getBoundingClientRect();
-
                         const totalWidthPx = endRect.right - startRect.left;
-                        
                         card.style.width = `${totalWidthPx - (visualPadding * 2)}px`;
                         card.style.left = `${visualPadding}px`;
-                        
                         const icons = item.icons || {};
                         card.innerHTML = `
                             <div class="supply-assets">
                                 <div class="mini-icons-stack">
-                                    ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div style="height:32px"></div>'}
-                                    ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.rank ? `<img src="${icons.rank}" class="mini-icon" crossorigin="anonymous">` : '<div style="height:32px"></div>'}
+                                    ${icons.type ? `<img src="${icons.type}" class="mini-icon" crossorigin="anonymous">` : '<div style="height:32px"></div>'}
                                 </div>
-                                ${icons.main ? `<img src="${icons.main}" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
+                                ${icons.main ? `<img src="${icons.main}" class="main-icon" crossorigin="anonymous">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
                             </div>
-                            <div class="supply-content">
-                                <span>${item.title}</span>
-                            </div>
+                            <div class="supply-content"><span>${item.title}</span></div>
                         `;
                         startCell.appendChild(card);
                     }
                 });
             });
+        }
+
+        async function takeScreenshot() {
+            const node = document.getElementById('capture-area');
+            const btn = document.getElementById('screenshotBtn');
+            if (!node || !window.htmlToImage) return;
+
+            const originalText = btn.innerText;
+            btn.innerText = "⌛ Обработка...";
+            btn.disabled = true;
+
+            try {
+
+                if(document.activeElement) document.activeElement.blur();
+
+                await document.fonts.ready;
+                await new Promise(r => setTimeout(r, 600));
+
+                const config = {
+                    pixelRatio: 2,
+                    backgroundColor: '#FEF8F2',
+                    fontEmbedCSS: '',
+                    skipFonts: true, 
+                    cacheBust: true, 
+                    imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=", 
+                    style: {
+                        transform: 'scale(1)',
+                        transformOrigin: 'top left'
+                    }
+                };
+
+                const blob = await window.htmlToImage.toBlob(node, config);
+                if (!blob) throw new Error("Не удалось создать изображение");
+
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `Schedule_${Date.now()}.png`;
+                link.href = url;
+                link.click();
+                
+                // Очистка ресурсов
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                
+                btn.innerText = originalText;
+            } catch (error) {
+                console.error('Export Error Detail:', error);
+                
+                try {
+                    const dataUrl = await window.htmlToImage.toPng(node, { pixelRatio: 1, skipFonts: true });
+                    const link = document.createElement('a');
+                    link.download = `Schedule_Fallback_${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                    btn.innerText = originalText;
+                } catch (fallbackError) {
+                    console.error('Fallback failed:', fallbackError);
+                    btn.innerText = "❌ Ошибка браузера";
+                }
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         window.onload = initTable;
