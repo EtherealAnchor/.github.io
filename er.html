@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Царство Элизиума</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -26,8 +26,6 @@
         body {
             background-color: var(--bg-color);
             background-image: linear-gradient(rgba(26, 20, 18, 0.9), rgba(26, 20, 18, 0.9));
-            background-size: cover;
-            background-attachment: fixed;
             font-family: 'Inter', sans-serif;
             color: var(--text-light);
             margin: 0;
@@ -35,7 +33,6 @@
             padding-bottom: 120px;
         }
 
-        /* Навигация */
         .nav-container {
             display: flex;
             justify-content: center;
@@ -54,34 +51,35 @@
             background: rgba(255, 255, 255, 0.05);
             color: white;
             font-weight: 700;
-            transition: all 0.3s ease;
-            cursor: pointer;
             border: 1px solid rgba(212, 175, 55, 0.3);
             text-decoration: none;
         }
 
-        .nav-button:hover { background: rgba(212, 175, 55, 0.15); }
-        .nav-button.active { background: var(--accent-gold); color: #1a1412; border-color: #fff; }
+        .nav-button.active { background: var(--accent-gold); color: #1a1412; }
 
         #capture-area {
             width: 1200px;
             margin: 30px auto;
-            padding: 40px;
+            padding: 50px;
             background: #2a221f; 
             border: 1px solid var(--border-color);
-            border-radius: 4px;
             position: relative;
             box-sizing: border-box;
-            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            /* Стабилизация шрифта */
+            font-variant-ligatures: none;
+            font-feature-settings: "kern" 0;
+            letter-spacing: 0px !important;
+            -webkit-font-smoothing: antialiased;
         }
 
         .header-section {
-            display: flex;
-            align-items: center;
-            gap: 25px;
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 30px;
             margin-bottom: 30px;
             border-bottom: 2px solid var(--accent-gold);
-            padding-bottom: 20px;
+            padding-bottom: 25px;
+            align-items: center;
         }
 
         .character-portrait {
@@ -89,56 +87,47 @@
             height: 110px;
             border: 2px solid var(--accent-gold);
             object-fit: cover;
+            background: #000;
         }
 
         .buff-row {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 70px;
             align-items: center;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #332a24;
-            font-size: 0.95rem;
-            min-height: 44px;
-        }
-
-        .buff-name {
-            text-align: left;
-            flex: 1;
-            padding-right: 20px;
-            line-height: 1.4;
+            min-height: 50px;
         }
 
         .tag {
-            padding: 2px 10px;
+            padding: 0;
             border-radius: 2px;
             font-size: 0.75rem;
             font-weight: 900;
-            min-width: 52px;
-            height: 24px;
+            width: 65px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-transform: uppercase;
-            flex-shrink: 0;
         }
 
         .card {
-            background: rgba(22, 18, 16, 0.8);
+            background: rgba(22, 18, 16, 0.95);
             border: 1px solid var(--border-color);
-            padding: 18px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            padding: 20px;
         }
 
         .card-title {
             color: var(--accent-gold);
             font-weight: 900;
             text-transform: uppercase;
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-bottom: 15px;
             text-align: center;
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            padding-bottom: 8px;
+            padding-bottom: 10px;
         }
 
         .grid-main {
@@ -156,12 +145,12 @@
 
         .legend {
             display: flex;
-            gap: 20px;
-            font-size: 0.85rem;
-            margin-bottom: 25px;
+            gap: 25px;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
             justify-content: center;
-            background: rgba(0,0,0,0.2);
-            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
         }
 
         .controls {
@@ -170,34 +159,37 @@
             left: 50%;
             transform: translateX(-50%);
             background: #2a1a15;
-            padding: 12px 25px;
-            border-radius: 4px;
-            border: 1px solid var(--accent-gold);
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: 2px solid var(--accent-gold);
             display: flex;
             gap: 15px;
             z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .control-btn {
             background: rgba(212, 175, 55, 0.1);
             border: 1px solid var(--accent-gold);
             color: var(--accent-gold);
-            padding: 8px 16px;
-            font-size: 0.8rem;
+            padding: 10px 20px;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
+        .control-btn:hover { background: var(--accent-gold); color: #1a1412; }
         .export-btn { background: #27ae60; color: white; border-color: #2ecc71; }
 
         table { width: 100%; border-collapse: collapse; }
-        table th, table td { border: 1px solid var(--border-color); padding: 8px; font-size: 0.8rem; text-align: center; }
+        table th, table td { border: 1px solid var(--border-color); padding: 12px 8px; font-size: 0.85rem; text-align: center; }
         
-        .item-icon { width: 36px; height: 36px; border: 1px solid var(--accent-gold); background: #000; }
+        .item-icon { width: 40px; height: 40px; border: 1px solid var(--accent-gold); background: #000; margin: 0 auto; }
 
         [contenteditable="true"]:focus { outline: none; background: rgba(255,255,255,0.05); }
 
-        h1 { line-height: 1.1 !important; }
+        h1 { margin: 0; font-weight: 900; line-height: 1.1 !important; letter-spacing: -1px; }
     </style>
 </head>
 <body>
@@ -210,10 +202,10 @@
 
     <div id="capture-area">
         <div class="header-section">
-            <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1d/Helical_Contraption_%28Icon%29.png" class="character-portrait" crossorigin="anonymous">
-            <div class="flex-1">
-                <h1 class="text-5xl font-black uppercase tracking-tighter" contenteditable="true">Усмиряющий клинок<br>возвещает о рассвете</h1>
-                <p class="text-yellow-600 font-bold mt-1" contenteditable="true">Рекомендованная сборка • Для Вилл-Ви</p>
+            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=vill-v" class="character-portrait" id="char-icon" crossorigin="anonymous">
+            <div>
+                <h1 class="text-5xl uppercase" contenteditable="true">Усмиряющий клинок<br>возвещает о рассвете</h1>
+                <p class="text-yellow-600 font-bold mt-2 text-xl" contenteditable="true">Рекомендованная сборка • Для Teri-Teri</p>
             </div>
         </div>
 
@@ -227,10 +219,10 @@
 
         <div class="grid-main">
             <div class="card">
-                <div class="card-title" contenteditable="true">Эксклюзивы</div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Sleight</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Facade</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Reversal</span> <span class="tag dynamic-tag" contenteditable="true">Н</span></div>
+                <div class="card-title" contenteditable="true">Эксклюзивное усиление</div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Sleight</div> <span class="tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Facade</div> <span class="tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Reversal</div> <span class="tag" contenteditable="true">Н</span></div>
             </div>
 
             <div class="card">
@@ -239,9 +231,9 @@
                     <thead>
                         <tr class="text-yellow-600">
                             <th contenteditable="true">Этажи</th>
-                            <th contenteditable="true">1 - 8</th>
-                            <th contenteditable="true">9 - 16</th>
-                            <th contenteditable="true">17 - 18</th>
+                            <th contenteditable="true">1 — 8</th>
+                            <th contenteditable="true">9 — 16</th>
+                            <th contenteditable="true">17 — 18</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -252,7 +244,7 @@
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                         </tr>
                         <tr>
-                            <td class="font-bold uppercase" contenteditable="true">Саппорты</td>
+                            <td class="font-bold uppercase" contenteditable="true">Поддежрка</td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                             <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
@@ -265,9 +257,9 @@
         <div id="dynamicCardsContainer" class="dynamic-grid">
             <div class="card">
                 <div class="card-title" contenteditable="true">Вилл-Ви II</div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Act II: Pendulum</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Act III: Conflict</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Intermezzo</span> <span class="tag dynamic-tag" contenteditable="true">ЯДРО</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Act II: Pendulum</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Act III: Conflict</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Intermezzo</div> <span class="tag" contenteditable="true">ЯДРО</span></div>
             </div>
         </div>
     </div>
@@ -310,8 +302,8 @@
             div.className = 'card';
             div.innerHTML = `
                 <div class="card-title" contenteditable="true">Новый Набор</div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Эффект</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span class="buff-name" contenteditable="true">Ядро</span> <span class="tag dynamic-tag" contenteditable="true">ЯДРО</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Эффект</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Ядро</div> <span class="tag" contenteditable="true">ЯДРО</span></div>
             `;
             container.appendChild(div);
             init();
@@ -325,36 +317,41 @@
         async function downloadScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.querySelector('.export-btn');
-            btn.innerText = "⌛ Ожидайте...";
             
-            const activeEl = document.activeElement;
-            if(activeEl) activeEl.blur();
-            const scale = 2;
-            const style = {
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                width: node.offsetWidth + 'px',
-                height: node.offsetHeight + 'px'
-            };
+            btn.innerText = "⌛ Сохранение...";
+            btn.disabled = true;
 
-            const param = {
-                height: node.offsetHeight * scale,
-                width: node.offsetWidth * scale,
-                style
-            };
+            if(document.activeElement) document.activeElement.blur();
 
-            domtoimage.toPng(node, param)
-                .then(function (dataUrl) {
-                    const link = document.createElement('a');
-                    link.download = `ER_Build_${Date.now()}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                    btn.innerText = "📸 Скачать скриншот";
-                })
-                .catch(function (error) {
-                    console.error('Ошибка экспорта:', error);
-                    btn.innerText = "❌ Ошибка";
+            await document.fonts.ready;
+            await new Promise(r => setTimeout(r, 500));
+
+            try {
+                if (typeof htmlToImage === 'undefined') {
+                    throw new Error("Библиотека htmlToImage не загружена. Проверьте соединение с CDN.");
+                }
+
+                const dataUrl = await htmlToImage.toPng(node, {
+                    pixelRatio: 2,
+                    backgroundColor: '#2a221f',
+                    style: {
+                        fontFamily: "'Inter', sans-serif",
+                        letterSpacing: '0px'
+                    }
                 });
+
+                const link = document.createElement('a');
+                link.download = `ER_Build_Elite_${Date.now()}.png`;
+                link.href = dataUrl;
+                link.click();
+                
+                btn.innerText = "📸 Скачать скриншот";
+            } catch (error) {
+                console.error('Ошибка экспорта:', error);
+                btn.innerText = "❌ Ошибка экспорта";
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         window.onload = init;
