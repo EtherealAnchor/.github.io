@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расписание поставок</title>
+    <title>Информационный портал</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,34 +25,48 @@
             scrollbar-width: none;
         }
 
-        .header-bg {
-            background: url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/bg.png') no-repeat center center;
-            background-size: cover;
-            height: 120px;
+        /* Навигационная панель */
+        .nav-container {
             display: flex;
-            flex-direction: column;
             justify-content: center;
-            align-items: center;
-            text-align: center;
+            gap: 20px;
+            padding: 20px;
+            background: #2d0a2a;
         }
 
-        .header-title {
-            font-size: 3.5rem;
+        .nav-button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
             font-weight: 700;
-            letter-spacing: 0.1em;
-            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .header-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 10px;
-            color: white;
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-button.active {
+            background: #9d1c8c;
+            border-color: pink;
+            box-shadow: 0 0 15px rgba(157, 28, 140, 0.5);
+        }
+
+        /* Контентные секции */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
         }
 
         .table-container {
             max-width: 1600px;
-            margin: 40px auto;
+            margin: 20px auto;
             padding: 20px;
             background: linear-gradient(to right, purple, pink);
             border-radius: 16px;
@@ -141,9 +155,10 @@
         }
 
         .mini-icon {
-            width: 22px;
-            height: 22px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
+            background: black;
         }
 
         .main-icon {
@@ -151,7 +166,6 @@
             height: 74px;
             object-fit: cover;
             border-radius: 6px;
-            background: #ddd;
         }
 
         .supply-content {
@@ -174,39 +188,65 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* Заглушки для новых страниц */
+        .placeholder-content {
+            text-align: center;
+            padding: 100px 20px;
+            color: #2d0a2a;
+        }
+        .placeholder-content h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <header class="header-bg">
-        <h1 class="header-title">РАСПИСАНИЕ ПОСТАВОК</h1>
-        <p class="header-subtitle">Основано на расписании китайских серверов</p>
-    </header>
+    <nav class="nav-container">
+        <button class="nav-button active" onclick="switchPage('schedule')">Расписание</button>
+        <button class="nav-button" onclick="switchPage('bosses')">Боссы</button>
+        <button class="nav-button" onclick="switchPage('elysium')">Царство Элизиума</button>
+    </nav>
 
-    <main class="table-container">
-        <table id="supplyTable">
-            <thead>
-                <tr id="weeksHeader">
-                    <th style="width: 180px;"></th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- Сгенерировано JS -->
-            </tbody>
-        </table>
-    </main>
+    <!-- Секция: Расписание -->
+    <section id="schedule-page" class="page-section active">
+        <main class="table-container">
+            <table id="supplyTable">
+                <thead>
+                    <tr id="weeksHeader">
+                        <th style="width: 180px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Сгенерировано JS -->
+                </tbody>
+            </table>
+        </main>
+    </section>
+
+    <!-- Секция: Боссы -->
+    <section id="bosses-page" class="page-section">
+        <div class="placeholder-content">
+            <h2>Боссы</h2>
+            <p>Здесь будет информация о текущих боссах Арены и Бездны.</p>
+        </div>
+    </section>
+
+    <!-- Секция: Царство Элизиума -->
+    <section id="elysium-page" class="page-section">
+        <div class="placeholder-content">
+            <h2>Царство Элизиума</h2>
+            <p>Здесь будут рекомендации по баффам и сборкам персонажей.</p>
+        </div>
+    </section>
 
     <script>
         const totalWeeks = 8;
         const categories = [
-            "Боевой костюм А",
-            "Боевой костюм Б",
-            "Экипировка А",
-            "Экипировка Б",
-            "Оператор",
-            "Наряд",
-            "Карнавал А",
-            "Карнавал Б"
+            "Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б",
+            "Оператор", "Наряд", "Карнавал А", "Карнавал Б"
         ];
         const weekDates = [
             "5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр",
@@ -216,9 +256,8 @@
         const supplyData = {
             "Боевой костюм А": [
                 { 
-                    title: "Усмиряющий клинок возвещает о рассвете", 
-                    startWeek: 1, 
-                    duration: 6, 
+                    title: "Усмиряющий клинок возвещает о рассвете</br></br>50% скидка на первые 10 круток", 
+                    startWeek: 1, duration: 6, 
                     icons: { 
                         main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", 
                         rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", 
@@ -229,8 +268,7 @@
             "Боевой костюм Б": [
                 { 
                     title: "Привет♪ Фея желаний любви♥️", 
-                    startWeek: 4, 
-                    duration: 3, 
+                    startWeek: 4, duration: 3, 
                     icons: { 
                         main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", 
                         rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png",
@@ -262,11 +300,21 @@
             ],
         };
 
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId + '-page').classList.add('active');
+            event.target.classList.add('active');
+
+            if (pageId === 'schedule') {
+                setTimeout(renderBanners, 10);
+            }
+        }
+
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
 
-            // Создаем заголовки недель
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
@@ -277,7 +325,6 @@
                 headerRow.appendChild(th);
             }
 
-            // Создаем строки категорий
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
                 const catTd = document.createElement('td');
@@ -294,17 +341,16 @@
                 tbody.appendChild(tr);
             });
 
-            // Ждем отрисовки DOM, затем рисуем баннеры
             setTimeout(renderBanners, 50);
         }
 
         function renderBanners() {
-            // Удаляем старые баннеры, если они были
+            if (!document.getElementById('schedule-page').classList.contains('active')) return;
+
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
 
             categories.forEach(cat => {
                 if (!supplyData[cat]) return;
-
                 supplyData[cat].forEach(item => {
                     const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
                     const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
@@ -313,16 +359,11 @@
                     if (startCell && endCell) {
                         const card = document.createElement('div');
                         card.className = 'supply-card';
-                        
-                        // Внутренний визуальный отступ для пробелов между баннерами
                         const visualPadding = 4; 
 
-                        // Вычисляем точные координаты в пикселях
                         const startRect = startCell.getBoundingClientRect();
                         const endRect = endCell.getBoundingClientRect();
-                        const parentRect = startCell.getBoundingClientRect();
 
-                        // Ширина = Конец последней ячейки минус Начало первой ячейки
                         const totalWidthPx = endRect.right - startRect.left;
                         
                         card.style.width = `${totalWidthPx - (visualPadding * 2)}px`;
@@ -332,8 +373,8 @@
                         card.innerHTML = `
                             <div class="supply-assets">
                                 <div class="mini-icons-stack">
-                                    ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div style="height:22px"></div>'}
-                                    ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div style="height:22px"></div>'}
+                                    ${icons.rank ? `<img src="${icons.rank}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.type ? `<img src="${icons.type}" class="mini-icon">` : '<div style="height:32px"></div>'}
                                 </div>
                                 ${icons.main ? `<img src="${icons.main}" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
                             </div>
@@ -348,7 +389,7 @@
         }
 
         window.onload = initTable;
-        window.onresize = renderBanners; // Пересчитываем при изменении размера окна
+        window.onresize = renderBanners;
     </script>
 </body>
 </html>
