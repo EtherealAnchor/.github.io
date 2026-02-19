@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Царство Элизиума</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -16,7 +16,6 @@
             --accent-gold: #d4af37;
             --text-light: #e0d5c1;
             --border-color: #43382f;
-            
             --color-s: #9b59b6;
             --color-o: #e74c3c;
             --color-p: #f39c12;
@@ -26,7 +25,7 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: linear-gradient(rgba(26, 20, 18, 0.9), rgba(26, 20, 18, 0.9)), url('https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/er_bg_placeholder.jpg');
+            background-image: linear-gradient(rgba(26, 20, 18, 0.9), rgba(26, 20, 18, 0.9));
             background-size: cover;
             background-attachment: fixed;
             font-family: 'Inter', sans-serif;
@@ -36,6 +35,7 @@
             padding-bottom: 120px;
         }
 
+        /* Навигация */
         .nav-container {
             display: flex;
             justify-content: center;
@@ -43,6 +43,9 @@
             padding: 20px;
             background: #2a1a15;
             border-bottom: 2px solid var(--accent-gold);
+            position: sticky;
+            top: 0;
+            z-index: 2000;
         }
 
         .nav-button {
@@ -57,16 +60,13 @@
             text-decoration: none;
         }
 
-        .nav-button.active {
-            background: var(--accent-gold);
-            color: #1a1412;
-            border-color: #fff;
-        }
+        .nav-button:hover { background: rgba(212, 175, 55, 0.15); }
+        .nav-button.active { background: var(--accent-gold); color: #1a1412; border-color: #fff; }
 
         #capture-area {
-            width: 1240px;
+            width: 1200px;
             margin: 30px auto;
-            padding: 30px;
+            padding: 40px;
             background: #2a221f; 
             border: 1px solid var(--border-color);
             border-radius: 4px;
@@ -91,17 +91,36 @@
             object-fit: cover;
         }
 
-        .grid-main {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
+        .buff-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #332a24;
+            font-size: 0.95rem;
+            min-height: 44px;
         }
 
-        .dynamic-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        .buff-name {
+            text-align: left;
+            flex: 1;
+            padding-right: 20px;
+            line-height: 1.4;
+        }
+
+        .tag {
+            padding: 2px 10px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 900;
+            min-width: 52px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         .card {
@@ -120,42 +139,19 @@
             text-align: center;
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
             padding-bottom: 8px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .buff-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #332a24;
-            font-size: 0.9rem;
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
         }
 
-        .tag {
-            padding: 2px 10px;
-            border-radius: 2px;
-            font-size: 0.75rem;
-            font-weight: 900;
-            min-width: 40px;
-            text-align: center;
-            color: white;
-            flex-shrink: 0;
-            transition: background-color 0.3s ease;
-            text-transform: uppercase;
-            cursor: text;
-        }
-
-        .tag:not([data-type]) { background: #444; }
-
-        .item-icon {
-            width: 42px;
-            height: 42px;
-            background: #000;
-            border: 1px solid var(--accent-gold);
+        .dynamic-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
         .legend {
@@ -180,49 +176,44 @@
             display: flex;
             gap: 15px;
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
         }
 
         .control-btn {
             background: rgba(212, 175, 55, 0.1);
             border: 1px solid var(--accent-gold);
             color: var(--accent-gold);
-            padding: 6px 16px;
-            font-size: 0.75rem;
+            padding: 8px 16px;
+            font-size: 0.8rem;
             font-weight: bold;
-            text-transform: uppercase;
             cursor: pointer;
         }
 
-        .export-btn {
-            background: #27ae60;
-            color: white;
-            border-color: #2ecc71;
-        }
+        .export-btn { background: #27ae60; color: white; border-color: #2ecc71; }
 
         table { width: 100%; border-collapse: collapse; }
-        table th, table td { border: 1px solid var(--border-color); padding: 10px; font-size: 0.8rem; }
+        table th, table td { border: 1px solid var(--border-color); padding: 8px; font-size: 0.8rem; text-align: center; }
+        
+        .item-icon { width: 36px; height: 36px; border: 1px solid var(--accent-gold); background: #000; }
 
-        [contenteditable="true"]:focus {
-            outline: 1px solid var(--accent-gold);
-            background: rgba(255,255,255,0.05);
-        }
+        [contenteditable="true"]:focus { outline: none; background: rgba(255,255,255,0.05); }
+
+        h1 { line-height: 1.1 !important; }
     </style>
 </head>
 <body>
 
     <nav class="nav-container">
         <a href="index.html" class="nav-button">Расписание</a>
-        <a href="index.html" class="nav-button">Боссы</a>
+        <a href="enemies.html" class="nav-button">Боссы</a>
         <a href="er.html" class="nav-button active">Царство Элизиума</a>
     </nav>
 
     <div id="capture-area">
         <div class="header-section">
-            <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1d/Helical_Contraption_%28Icon%29.png" class="character-portrait">
+            <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1d/Helical_Contraption_%28Icon%29.png" class="character-portrait" crossorigin="anonymous">
             <div class="flex-1">
-                <h1 class="text-4xl font-black uppercase tracking-tighter" contenteditable="true">Усмиряющий клинок</br>возвещает о рассвете</h1>
-                <p class="text-yellow-600/80 font-bold" contenteditable="true">Рекомендованная сборка • Для Teri-Teri</p>
+                <h1 class="text-5xl font-black uppercase tracking-tighter" contenteditable="true">Усмиряющий клинок<br>возвещает о рассвете</h1>
+                <p class="text-yellow-600 font-bold mt-1" contenteditable="true">Рекомендованная сборка • Для Вилл-Ви</p>
             </div>
         </div>
 
@@ -231,70 +222,40 @@
             <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-o)">О</span> <span>Обязательные</span></div>
             <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-p)">П</span> <span>Приоритетные</span></div>
             <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-n)">Н</span> <span>Необязательные</span></div>
-            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-core)">Ядро</span> <span>Ядро</span></div>
+            <div class="flex items-center gap-2"><span class="tag" style="background: var(--color-core)">ЯДРО</span> <span>Ядро</span></div>
         </div>
 
         <div class="grid-main">
             <div class="card">
                 <div class="card-title" contenteditable="true">Эксклюзивы</div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Sleight</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Facade</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
-                <div class="buff-row"><span contenteditable="true">Blessing of Reversal</span> <span class="tag dynamic-tag" contenteditable="true">Н</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Sleight</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Facade</span> <span class="tag dynamic-tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Blessing of Reversal</span> <span class="tag dynamic-tag" contenteditable="true">Н</span></div>
             </div>
 
             <div class="card">
                 <div class="card-title" contenteditable="true">Подготовка</div>
-                <table class="w-full text-xs border-collapse">
+                <table>
                     <thead>
                         <tr class="text-yellow-600">
-                            <th class="p-2" contenteditable="true">Этажи</th>
-                            <th class="p-2" contenteditable="true">1 - 8</th>
-                            <th class="p-2" contenteditable="true">9 - 16</th>
-                            <th class="p-2" contenteditable="true">17 - 18</th>
+                            <th contenteditable="true">Этажи</th>
+                            <th contenteditable="true">1 - 8</th>
+                            <th contenteditable="true">9 - 16</th>
+                            <th contenteditable="true">17 - 18</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="p-2 font-bold uppercase text-center" contenteditable="true">Печати</td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7a/Pseudo_Miracle_%28Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Falling_in_Past_Light_%28Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Because_of_You_%28Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Falling_in_Past_Light_%28Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/13/Proof_of_Good_and_Evil_%28Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Falling_in_Past_Light_%28Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
+                            <td class="font-bold uppercase" contenteditable="true">Печати</td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                         </tr>
                         <tr>
-                            <td class="p-2 font-bold uppercase text-center" contenteditable="true">Поддержка</td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ea/Blood_Rose_%28Support_Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/ab/Azure_Empyrea_%28Support_Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ea/Blood_Rose_%28Support_Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/ab/Azure_Empyrea_%28Support_Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
-                            <td class="p-2 text-center">
-                                <div class="flex justify-center gap-1">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ea/Blood_Rose_%28Support_Icon%29.png" class="item-icon">
-                                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/ab/Azure_Empyrea_%28Support_Icon%29.png" class="item-icon">
-                                </div>
-                            </td>
+                            <td class="font-bold uppercase" contenteditable="true">Саппорты</td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
+                            <td><div class="flex justify-center gap-1"><div class="item-icon"></div><div class="item-icon"></div></div></td>
                         </tr>
                     </tbody>
                 </table>
@@ -304,14 +265,9 @@
         <div id="dynamicCardsContainer" class="dynamic-grid">
             <div class="card">
                 <div class="card-title" contenteditable="true">Вилл-Ви II</div>
-                <div class="buff-row"><span contenteditable="true">Act II: Pendulum</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Act III: Conflict</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Intermezzo</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
-            </div>
-            <div class="card">
-                <div class="card-title" contenteditable="true">Кевин II</div>
-                <div class="buff-row"><span contenteditable="true">Artifact of Inhibitor</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Shadow of Deliverer</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Act II: Pendulum</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Act III: Conflict</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Intermezzo</span> <span class="tag dynamic-tag" contenteditable="true">ЯДРО</span></div>
             </div>
         </div>
     </div>
@@ -323,96 +279,85 @@
     </div>
 
     <script>
-        function updateTagColor(tag) {
-            const text = tag.innerText.trim().toUpperCase();
-            let color = '#444';
-            
-            if (text === 'С' || text === 'C') color = 'var(--color-s)';
-            else if (text === 'О' || text === 'O') color = 'var(--color-o)';
-            else if (text === 'П' || text === 'P') color = 'var(--color-p)';
-            else if (text === 'Н' || text === 'H') color = 'var(--color-n)';
-            else if (text === 'ЯДРО' || text === 'CORE') color = 'var(--color-core)';
-            
-            tag.style.backgroundColor = color;
+        function getTagColor(text) {
+            const t = text.trim().toUpperCase();
+            if (t === 'С' || t === 'C') return '#9b59b6';
+            if (t === 'О' || t === 'O') return '#e74c3c';
+            if (t === 'П' || t === 'P') return '#f39c12';
+            if (t === 'Н' || t === 'H') return '#7f8c8d';
+            if (t === 'ЯДРО' || t === 'CORE') return '#1abc9c';
+            return '#444';
         }
 
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                    const target = mutation.target.parentElement.classList.contains('tag') 
-                        ? mutation.target.parentElement 
-                        : mutation.target;
-                    if (target.classList && target.classList.contains('tag')) {
-                        updateTagColor(target);
-                    }
-                }
+        function updateAllTags() {
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.style.backgroundColor = getTagColor(tag.innerText);
             });
-        });
+        }
 
-        function initTagObservers() {
-            document.querySelectorAll('.dynamic-tag').forEach(tag => {
-                updateTagColor(tag);
+        const observer = new MutationObserver(() => updateAllTags());
+
+        function init() {
+            updateAllTags();
+            document.querySelectorAll('.tag').forEach(tag => {
                 observer.observe(tag, { characterData: true, childList: true, subtree: true });
             });
         }
-
-        const container = document.getElementById('dynamicCardsContainer');
 
         function addCard() {
-            if (container.children.length >= 8) return;
-            const newCard = document.createElement('div');
-            newCard.className = 'card';
-            newCard.innerHTML = `
-                <div class="card-title" contenteditable="true">Новый Набор I</div>
-                <div class="buff-row"><span contenteditable="true">Бафф А</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
-                <div class="buff-row"><span contenteditable="true">Ядро</span> <span class="tag dynamic-tag" contenteditable="true">Ядро</span></div>
+            const container = document.getElementById('dynamicCardsContainer');
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="card-title" contenteditable="true">Новый Набор</div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Эффект</span> <span class="tag dynamic-tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><span class="buff-name" contenteditable="true">Ядро</span> <span class="tag dynamic-tag" contenteditable="true">ЯДРО</span></div>
             `;
-            container.appendChild(newCard);
-            
-            newCard.querySelectorAll('.dynamic-tag').forEach(tag => {
-                updateTagColor(tag);
-                observer.observe(tag, { characterData: true, childList: true, subtree: true });
-            });
+            container.appendChild(div);
+            init();
         }
 
         function removeCard() {
+            const container = document.getElementById('dynamicCardsContainer');
             if (container.children.length > 0) container.removeChild(container.lastElementChild);
         }
 
         async function downloadScreenshot() {
-            const area = document.getElementById('capture-area');
-            const originalShadow = area.style.boxShadow;
-            area.style.boxShadow = 'none';
+            const node = document.getElementById('capture-area');
+            const btn = document.querySelector('.export-btn');
+            btn.innerText = "⌛ Ожидайте...";
+            
+            const activeEl = document.activeElement;
+            if(activeEl) activeEl.blur();
+            const scale = 2;
+            const style = {
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+                width: node.offsetWidth + 'px',
+                height: node.offsetHeight + 'px'
+            };
 
-            try {
-                const canvas = await html2canvas(area, {
-                    backgroundColor: '#1a1412',
-                    scale: 2,
-                    useCORS: true,
-                    onclone: (clonedDoc) => {
-                        clonedDoc.querySelectorAll('.tag').forEach(tag => {
-                            const text = tag.innerText.trim().toUpperCase();
-                            if (text === 'С' || text === 'C') tag.style.backgroundColor = '#9b59b6';
-                            else if (text === 'О' || text === 'O') tag.style.backgroundColor = '#e74c3c';
-                            else if (text === 'П' || text === 'P') tag.style.backgroundColor = '#f39c12';
-                            else if (text === 'Н' || text === 'H') tag.style.backgroundColor = '#7f8c8d';
-                            else if (text === 'ЯДРО' || text === 'CORE') tag.style.backgroundColor = '#1abc9c';
-                        });
-                    }
+            const param = {
+                height: node.offsetHeight * scale,
+                width: node.offsetWidth * scale,
+                style
+            };
+
+            domtoimage.toPng(node, param)
+                .then(function (dataUrl) {
+                    const link = document.createElement('a');
+                    link.download = `ER_Build_${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                    btn.innerText = "📸 Скачать скриншот";
+                })
+                .catch(function (error) {
+                    console.error('Ошибка экспорта:', error);
+                    btn.innerText = "❌ Ошибка";
                 });
-
-                const link = document.createElement('a');
-                link.download = 'er_build_fixed.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } catch (err) {
-                console.error(err);
-            } finally {
-                area.style.boxShadow = originalShadow;
-            }
         }
 
-        window.onload = initTagObservers;
+        window.onload = init;
     </script>
 </body>
 </html>
