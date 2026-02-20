@@ -87,6 +87,12 @@
             overflow-x: auto;
         }
 
+        .capture-wrapper {
+            background: transparent;
+            display: inline-block;
+            min-width: 100%;
+        }
+
         table {
             width: 100%;
             border-collapse: separate;
@@ -215,15 +221,17 @@
     </nav>
 
     <section id="schedule-page" class="page-section active">
-        <main class="table-container" id="capture-area">
-            <table id="supplyTable">
-                <thead>
-                    <tr id="weeksHeader">
-                        <th style="width: 180px;"></th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <main class="table-container" id="scroll-container">
+            <div class="capture-wrapper" id="capture-area">
+                <table id="supplyTable">
+                    <thead>
+                        <tr id="weeksHeader">
+                            <th style="width: 180px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </main>
     </section>
 
@@ -388,20 +396,27 @@
 
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
+            const scrollContainer = document.getElementById('scroll-container');
             const btn = document.getElementById('screenshotBtn');
+            
             if (!node || !window.htmlToImage) return;
 
             const originalText = btn.innerText;
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
 
+            const oldScrollLeft = scrollContainer.scrollLeft;
+            scrollContainer.scrollLeft = 0;
+
             try {
-                await new Promise(r => setTimeout(r, 300));
+                await new Promise(r => setTimeout(r, 150));
 
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
                     skipFonts: false,
+                    width: node.offsetWidth,
+                    height: node.offsetHeight,
                     fontEmbedCSS: document.styleSheets[2] ? "" : undefined 
                 };
 
@@ -420,7 +435,7 @@
                 try {
                     const dataUrlFallback = await window.htmlToImage.toPng(node, { pixelRatio: 1, skipFonts: true });
                     const link = document.createElement('a');
-                    link.download = `HI3_Schedule_Simple.png`;
+                    link.download = `HI3_Schedule.png`;
                     link.href = dataUrlFallback;
                     link.click();
                     btn.innerText = originalText;
@@ -428,6 +443,7 @@
                     btn.innerText = "❌ Ошибка";
                 }
             } finally {
+                scrollContainer.scrollLeft = oldScrollLeft;
                 btn.disabled = false;
             }
         }
