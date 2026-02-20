@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enemies Schedule</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,6 +22,7 @@
             font-family: 'Oswald', sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
         .main-nav {
@@ -47,15 +50,15 @@
         }
 
         .capture-wrapper {
-            padding: 20px;
             display: inline-block;
+            min-width: 100%;
+            padding: 24px; 
         }
 
         #capture-area {
             background-color: #0f172a;
             display: inline-block;
-            min-width: 100%;
-            padding: 24px; 
+            padding: 32px; 
             border-radius: 16px;
         }
 
@@ -94,10 +97,10 @@
 
         .boss-svg-container {
             position: absolute;
-            bottom: -5px;
-            right: -5px;
-            width: 110%;
-            height: 60px;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 50;
             overflow: visible;
@@ -114,6 +117,7 @@
             paint-order: stroke fill;
             text-anchor: end;
             text-transform: uppercase;
+            transform: skewX(-12deg);
         }
 
         .type-badge {
@@ -122,12 +126,27 @@
             left: 0;
             background: var(--accent-orange);
             color: white;
-            font-size: 0.7rem;
-            padding: 2px 10px;
+            font-size: 14px;
+            height: 22px;
+            padding: 0 12px 0 12px; 
             font-weight: 700;
             z-index: 60;
             text-transform: uppercase;
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .type-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 22px 10px 0 0;
+            border-color: var(--accent-orange) transparent transparent transparent;
         }
 
         .week-col {
@@ -163,7 +182,9 @@
             cursor: pointer;
             text-transform: uppercase;
             font-weight: bold;
+            opacity: 0.6;
         }
+        .btn-delete:hover { opacity: 1; }
 
         .controls {
             padding: 20px;
@@ -190,25 +211,25 @@
 <body>
 
     <nav class="main-nav">
-        <a href="index.html" class="nav-btn">Расписание</a>
-        <a href="enemies.html" class="nav-btn active">Боссы</a>
-        <a href="er.html" class="nav-btn">Царство Элизиума</a>
+        <a href="#" class="nav-btn">Расписание</a>
+        <a href="#" class="nav-btn active">Боссы</a>
+        <a href="#" class="nav-btn">Царство Элизиума</a>
     </nav>
 
     <div class="container mx-auto text-center">
         <div class="controls">
             <button onclick="addWeek()" class="px-6 py-2 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">Добавить неделю</button>
-            <button onclick="takeScreenshot()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">Скачать PNG</button>
+            <button id="screenshotBtn" onclick="takeScreenshot()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">Скачать PNG</button>
         </div>
 
-        <div class="capture-wrapper">
+        <div class="capture-wrapper" id="scroll-container">
             <div id="capture-area">
                 <table class="custom-table" id="bossMainTable">
                     <thead>
                         <tr>
                             <th rowspan="2">Неделя</th>
-                            <th colspan="2">Бездна (Abyss)</th>
-                            <th rowspan="2" colspan="3">Арена (Memorial Arena)</th>
+                            <th colspan="2">Бездна (EX Abyss)</th>
+                            <th rowspan="2" colspan="3">Арена воспоминаний<br>(Memorial Arena)</th>
                         </tr>
                         <tr style="font-size: 0.7rem; opacity: 0.8;">
                             <th>Пятница</th>
@@ -223,8 +244,8 @@
     </div>
 
     <div id="textModal">
-        <h3 class="font-bold mb-2 text-slate-800">Имя босса</h3>
-        <input type="text" id="cellTextInput" class="border p-2 w-full mb-4 rounded text-black" placeholder="BOSS NAME">
+        <h3 class="font-bold mb-2 text-slate-800">Погода</h3>
+        <input type="text" id="cellTextInput" class="border p-2 w-full mb-4 rounded text-black uppercase" placeholder="BOSS NAME">
         <div class="flex justify-end gap-2">
             <button onclick="closeModal()" class="px-4 py-2 text-slate-500">Отмена</button>
             <button onclick="saveCellText()" class="px-4 py-2 bg-blue-600 text-white rounded">ОК</button>
@@ -261,8 +282,8 @@
                 <div class="boss-cell" onclick="handleCellClick(this, event)">
                     ${withBadge ? `<div class="type-badge">${badgeText}</div>` : ''}
                     <div class="boss-svg-container">
-                        <svg width="100%" height="100%" viewBox="0 0 250 60" preserveAspectRatio="xEndYEnd slice">
-                            <text x="240" y="45" class="boss-svg-text"></text>
+                        <svg width="100%" height="100%" viewBox="0 0 250 120" style="overflow:visible">
+                            <text x="245" y="115" class="boss-svg-text"></text>
                         </svg>
                     </div>
                     <input type="file" accept="image/*" onchange="loadImage(this)" style="display:none">
@@ -271,7 +292,7 @@
         }
 
         function handleCellClick(cell, event) {
-            if (event.altKey || event.shiftKey || event.ctrlKey) {
+            if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
                 openTextModal(cell);
             } else {
                 cell.querySelector('input[type="file"]').click();
@@ -315,23 +336,46 @@
         }
 
         async function takeScreenshot() {
-            const area = document.getElementById('capture-area');
-            area.classList.add('exporting');
+            const node = document.getElementById('capture-area');
+            const scrollContainer = document.getElementById('scroll-container');
+            const btn = document.getElementById('screenshotBtn');
             
-            await new Promise(r => setTimeout(r, 500));
+            if (!node || !btn || !window.htmlToImage) return;
 
-            html2canvas(area, {
-                backgroundColor: '#0f172a',
-                scale: 2,
-                useCORS: true,
-                allowTaint: true
-            }).then(canvas => {
+            const originalText = btn.innerText;
+            btn.innerText = "⌛ Сохранение...";
+            btn.disabled = true;
+
+            const oldScrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
+            if (scrollContainer) scrollContainer.scrollLeft = 0;
+
+            try {
+                node.classList.add('exporting');
+                await new Promise(r => setTimeout(r, 400));
+
+                const config = {
+                    pixelRatio: 2,
+                    backgroundColor: '#0f172a'
+                };
+
+                const dataUrl = await window.htmlToImage.toPng(node, config);
+                
+                if (!dataUrl) throw new Error("Image generation failed");
+
                 const link = document.createElement('a');
-                link.download = `honkai-bosses.png`;
-                link.href = canvas.toDataURL('image/png');
+                link.download = `HI3_Schedule_${new Date().toISOString().slice(0,10)}.png`;
+                link.href = dataUrl;
                 link.click();
-                area.classList.remove('exporting');
-            });
+                
+                btn.innerText = originalText;
+            } catch (error) {
+                console.error('Screenshot failed:', error);
+                btn.innerText = "❌ Ошибка";
+            } finally {
+                if (scrollContainer) scrollContainer.scrollLeft = oldScrollLeft;
+                node.classList.remove('exporting');
+                btn.disabled = false;
+            }
         }
 
         window.onload = () => addWeek();
