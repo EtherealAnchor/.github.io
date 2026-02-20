@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemies Schedule</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --table-header: #1e293b;
+            --cell-blue: #1e3a8a;
+            --accent-orange: #f97316;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Oswald', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-nav {
+            background-color: var(--table-header);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.375rem;
+            color: white;
+            font-weight: 600;
+            transition: background 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .nav-btn.active {
+            background: var(--accent-orange);
+        }
+
+        .capture-wrapper {
+            padding: 20px;
+            display: inline-block;
+        }
+
+        #capture-area {
+            background-color: #0f172a;
+            padding: 30px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .custom-table {
+            border-collapse: separate;
+            border-spacing: 12px;
+            color: white;
+        }
+
+        .custom-table th {
+            background: #1e293b;
+            padding: 15px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .boss-cell {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            background-color: #1e293b;
+            border-radius: 4px;
+            cursor: pointer;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: border-color 0.2s;
+        }
+
+        .boss-cell:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .boss-svg-container {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 110%;
+            height: 60px;
+            pointer-events: none;
+            z-index: 50;
+            overflow: visible;
+        }
+
+        .boss-svg-text {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            fill: white;
+            stroke: black;
+            stroke-width: 6px;
+            stroke-linejoin: round;
+            paint-order: stroke fill;
+            text-anchor: end;
+            text-transform: uppercase;
+        }
+
+        .type-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--accent-orange);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            font-weight: 700;
+            z-index: 60;
+            text-transform: uppercase;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+        }
+
+        .week-col {
+            width: 120px;
+            text-align: center;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+
+        .week-num {
+            font-weight: 700;
+            font-size: 3rem;
+            line-height: 1;
+            color: white;
+        }
+
+        .week-date-input {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+
+        .exporting .btn-delete { display: none !important; }
+
+        .btn-delete {
+            color: #ef4444;
+            font-size: 0.7rem;
+            margin-top: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #textModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            width: 350px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="main-nav">
+        <a href="#" class="nav-btn active">Расписание</a>
+        <a href="#" class="nav-btn">Боссы</a>
+        <a href="#" class="nav-btn">Элизиум</a>
+    </nav>
+
+    <div class="container mx-auto text-center">
+        <div class="controls">
+            <button onclick="addWeek()" class="px-6 py-2 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">Добавить неделю</button>
+            <button onclick="takeScreenshot()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">Скачать PNG</button>
+        </div>
+
+        <div class="capture-wrapper">
+            <div id="capture-area">
+                <table class="custom-table" id="bossMainTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Неделя</th>
+                            <th colspan="2">Бездна (Abyss)</th>
+                            <th rowspan="2" colspan="3">Арена (Memorial Arena)</th>
+                        </tr>
+                        <tr style="font-size: 0.7rem; opacity: 0.8;">
+                            <th>Пятница</th>
+                            <th>Понедельник</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="textModal">
+        <h3 class="font-bold mb-2 text-slate-800">Имя босса</h3>
+        <input type="text" id="cellTextInput" class="border p-2 w-full mb-4 rounded text-black" placeholder="BOSS NAME">
+        <div class="flex justify-end gap-2">
+            <button onclick="closeModal()" class="px-4 py-2 text-slate-500">Отмена</button>
+            <button onclick="saveCellText()" class="px-4 py-2 bg-blue-600 text-white rounded">ОК</button>
+        </div>
+    </div>
+
+    <script>
+        let currentEditingCell = null;
+        let weekCount = 0;
+
+        function addWeek() {
+            weekCount++;
+            const tbody = document.getElementById('tableBody');
+            const row = document.createElement('tr');
+            row.id = `week-row-${weekCount}`;
+            
+            row.innerHTML = `
+                <td class="week-col">
+                    <div class="week-num">${weekCount}</div>
+                    <input type="text" class="week-date-input" placeholder="ДАТА">
+                    <div onclick="deleteRow(${weekCount})" class="btn-delete">Удалить</div>
+                </td>
+                <td>${createBossCell(false)}</td>
+                <td>${createBossCell(false)}</td>
+                <td>${createBossCell(true, 'SSS')}</td>
+                <td>${createBossCell(true, 'SSS')}</td>
+                <td>${createBossCell(true, 'SS')}</td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function createBossCell(withBadge, badgeText = '') {
+            return `
+                <div class="boss-cell" onclick="handleCellClick(this, event)">
+                    ${withBadge ? `<div class="type-badge">${badgeText}</div>` : ''}
+                    <div class="boss-svg-container">
+                        <svg width="100%" height="100%" viewBox="0 0 250 60" preserveAspectRatio="xEndYEnd slice">
+                            <text x="240" y="45" class="boss-svg-text"></text>
+                        </svg>
+                    </div>
+                    <input type="file" accept="image/*" onchange="loadImage(this)" style="display:none">
+                </div>
+            `;
+        }
+
+        function handleCellClick(cell, event) {
+            if (event.altKey || event.shiftKey || event.ctrlKey) {
+                openTextModal(cell);
+            } else {
+                cell.querySelector('input[type="file"]').click();
+            }
+        }
+
+        function loadImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    input.parentElement.style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openTextModal(cell) {
+            currentEditingCell = cell;
+            const currentText = cell.querySelector('.boss-svg-text').textContent;
+            document.getElementById('cellTextInput').value = currentText;
+            document.getElementById('textModal').style.display = 'block';
+            document.getElementById('cellTextInput').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('textModal').style.display = 'none';
+        }
+
+        function saveCellText() {
+            if (currentEditingCell) {
+                const textValue = document.getElementById('cellTextInput').value;
+                currentEditingCell.querySelector('.boss-svg-text').textContent = textValue;
+            }
+            closeModal();
+        }
+
+        function deleteRow(id) {
+            const row = document.getElementById(`week-row-${id}`);
+            if(row) row.remove();
+        }
+
+        async function takeScreenshot() {
+            const area = document.getElementById('capture-area');
+            area.classList.add('exporting');
+            
+            await new Promise(r => setTimeout(r, 500));
+
+            html2canvas(area, {
+                backgroundColor: '#0f172a',
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `honkai-bosses.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                area.classList.remove('exporting');
+            });
+        }
+
+        window.onload = () => addWeek();
+    </script>
+</body>
+</html>
