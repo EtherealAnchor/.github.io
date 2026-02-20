@@ -256,30 +256,28 @@
         const imageCache = new Map();
 
         async function toDataURL(url) {
-            if (!url) return "";
+            if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
-
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
             
             try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error("Proxy error");
-                const data = await response.json();
-                
-                const rawProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                const rawRes = await fetch(rawProxy);
-                const blob = await rawRes.blob();
+                const response = await fetch(proxyUrl, { cache: 'no-cache' });
+                if (!response.ok) throw new Error("Network error");
+                const blob = await response.blob();
                 
                 return await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        imageCache.set(url, reader.result);
-                        resolve(reader.result);
+                        const base64data = reader.result;
+                        imageCache.set(url, base64data);
+                        renderBanners(); 
+                        resolve(base64data);
                     };
                     reader.readAsDataURL(blob);
                 });
             } catch (e) {
-                console.warn("Failed to proxy image:", url);
+                console.error("CORS Proxy failed for:", url, e);
                 return url; 
             }
         }
@@ -297,7 +295,7 @@
             });
             const uniqueUrls = [...new Set(urls)].filter(u => u && u.startsWith('http'));
             
-            await Promise.all(uniqueUrls.map(u => toDataURL(u)));
+            uniqueUrls.forEach(u => toDataURL(u));
         }
 
         function switchTab(pageId) {
@@ -337,12 +335,15 @@
                 }
                 tbody.appendChild(tr);
             });
-            await preloadAllImages();
+            
+            preloadAllImages();
             renderBanners();
         }
 
         function renderBanners() {
-            if (!document.getElementById('schedule-page').classList.contains('active')) return;
+            const schedulePage = document.getElementById('schedule-page');
+            if (!schedulePage || !schedulePage.classList.contains('active')) return;
+            
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
             
             categories.forEach(cat => {
@@ -391,53 +392,40 @@
             if (!node || !window.htmlToImage) return;
 
             const originalText = btn.innerText;
-            btn.innerText = "⌛ Обработка...";
+            btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
 
             try {
-
-                renderBanners();
-                
-                await new Promise(r => setTimeout(r, 600));
+                await new Promise(r => setTimeout(r, 300));
 
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    skipFonts: false, 
-                    fontEmbedCSS: '',
-                    style: {
-                        margin: '0',
-                        padding: '20px'
-                    }
+                    skipFonts: false,
+                    fontEmbedCSS: document.styleSheets[2] ? "" : undefined 
                 };
 
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
-                if (!dataUrl || dataUrl.length < 100) {
-                    throw new Error("Скриншот пустой или слишком мал");
-                }
+                if (!dataUrl || dataUrl.length < 500) throw new Error("Invalid image generated");
 
                 const link = document.createElement('a');
-                link.download = `Schedule_HI3_${new Date().toISOString().slice(0,10)}.png`;
+                link.download = `HI3_Schedule_${new Date().toLocaleDateString()}.png`;
                 link.href = dataUrl;
-                document.body.appendChild(link);
                 link.click();
-                document.body.removeChild(link);
                 
                 btn.innerText = originalText;
             } catch (error) {
-                console.error('Screenshot error detail:', error);
-                btn.innerText = "❌ Ошибка экспорта";
-                if (confirm("Произошла ошибка CORS или шрифтов. Попробовать создать скриншот без шрифтов?")) {
-                    try {
-                        const dataUrlAlt = await window.htmlToImage.toPng(node, { ...config, skipFonts: true });
-                        const link = document.createElement('a');
-                        link.download = `Schedule_Simple.png`;
-                        link.href = dataUrlAlt;
-                        link.click();
-                    } catch (e) {
-                        console.error("Final fallback failed", e);
-                    }
+                console.error('Screenshot failed:', error);
+                try {
+                    const dataUrlFallback = await window.htmlToImage.toPng(node, { pixelRatio: 1, skipFonts: true });
+                    const link = document.createElement('a');
+                    link.download = `HI3_Schedule_Simple.png`;
+                    link.href = dataUrlFallback;
+                    link.click();
+                    btn.innerText = originalText;
+                } catch (e) {
+                    btn.innerText = "❌ Ошибка";
                 }
             } finally {
                 btn.disabled = false;
