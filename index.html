@@ -81,16 +81,17 @@
         .table-container {
             max-width: 1600px;
             margin: 20px auto;
-            padding: 20px;
-            background: linear-gradient(to right, purple, pink);
-            border-radius: 16px;
+            padding: 0;
             overflow-x: auto;
+            border-radius: 16px;
         }
 
         .capture-wrapper {
-            background: transparent;
+            background: linear-gradient(to right, #800080, #ffc0cb);
             display: inline-block;
             min-width: 100%;
+            padding: 24px; 
+            border-radius: 16px;
         }
 
         table {
@@ -217,7 +218,7 @@
         <button id="nav-schedule" class="nav-button active" onclick="switchTab('schedule')">Расписание</button>
         <a href="enemies.html" class="nav-button">Боссы</a>
         <a href="er.html" class="nav-button">Царство Элизиума</a>
-        <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">📸 Создать скриншот</button>
+        <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">Создать скриншот</button>
     </nav>
 
     <section id="schedule-page" class="page-section active">
@@ -302,7 +303,6 @@
                 });
             });
             const uniqueUrls = [...new Set(urls)].filter(u => u && u.startsWith('http'));
-            
             uniqueUrls.forEach(u => toDataURL(u));
         }
 
@@ -409,7 +409,7 @@
             scrollContainer.scrollLeft = 0;
 
             try {
-                await new Promise(r => setTimeout(r, 150));
+                await new Promise(r => setTimeout(r, 200));
 
                 const config = {
                     pixelRatio: 2,
@@ -422,7 +422,7 @@
 
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
-                if (!dataUrl || dataUrl.length < 500) throw new Error("Invalid image generated");
+                if (!dataUrl || dataUrl.length < 500) throw new Error("Invalid image");
 
                 const link = document.createElement('a');
                 link.download = `HI3_Schedule_${new Date().toLocaleDateString()}.png`;
@@ -432,16 +432,7 @@
                 btn.innerText = originalText;
             } catch (error) {
                 console.error('Screenshot failed:', error);
-                try {
-                    const dataUrlFallback = await window.htmlToImage.toPng(node, { pixelRatio: 1, skipFonts: true });
-                    const link = document.createElement('a');
-                    link.download = `HI3_Schedule.png`;
-                    link.href = dataUrlFallback;
-                    link.click();
-                    btn.innerText = originalText;
-                } catch (e) {
-                    btn.innerText = "❌ Ошибка";
-                }
+                btn.innerText = "❌ Ошибка";
             } finally {
                 scrollContainer.scrollLeft = oldScrollLeft;
                 btn.disabled = false;
