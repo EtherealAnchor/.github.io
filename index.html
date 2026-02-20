@@ -227,7 +227,6 @@
         </main>
     </section>
 
-
     <script>
         const totalWeeks = 8;
         const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
@@ -264,6 +263,7 @@
             if (!url) return "";
             if (imageCache.has(url)) return imageCache.get(url);
             
+            // Пытаемся загрузить напрямую или через прокси
             const attempts = [url, ...proxyServers.map(p => p + encodeURIComponent(url))];
             
             for (const targetUrl of attempts) {
@@ -274,8 +274,9 @@
                     return await new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onloadend = () => {
-                            imageCache.set(url, reader.result);
-                            resolve(reader.result);
+                            const result = reader.result;
+                            imageCache.set(url, result);
+                            resolve(result);
                         };
                         reader.onerror = reject;
                         reader.readAsDataURL(blob);
@@ -284,7 +285,7 @@
                     continue;
                 }
             }
-            return url;
+            return url; 
         }
 
         async function preloadAllImages() {
@@ -309,10 +310,10 @@
             const targetButton = document.getElementById('nav-' + pageId);
             if (targetSection) targetSection.classList.add('active');
             if (targetButton) targetButton.classList.add('active');
-            if (pageId === 'schedule') setTimeout(renderBanners, 50);
+            if (pageId === 'schedule') renderBanners();
         }
 
-        function initTable() {
+        async function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
             headerRow.innerHTML = '<th style="width: 180px;"></th>';
@@ -340,9 +341,9 @@
                 tbody.appendChild(tr);
             });
             
-            preloadAllImages().then(() => {
-                renderBanners();
-            });
+            // Сначала прелоад, потом рендер
+            await preloadAllImages();
+            renderBanners();
         }
 
         function renderBanners() {
@@ -369,6 +370,7 @@
                         card.style.left = `${visualPadding}px`;
                         
                         const icons = item.icons || {};
+                        // Используем кэшированные Base64 или оригиналы
                         const mainSrc = imageCache.get(icons.main) || icons.main;
                         const rankSrc = imageCache.get(icons.rank) || icons.rank;
                         const typeSrc = imageCache.get(icons.type) || icons.type;
@@ -399,30 +401,23 @@
             btn.disabled = true;
 
             try {
-                if(document.activeElement) document.activeElement.blur();
-                
+                // Ждем отрисовку на всякий случай
                 renderBanners();
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 500));
 
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: '',
-                    skipFonts: true,
                     cacheBust: true,
-                    imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
                     style: {
-                        transform: 'scale(1)',
-                        transformOrigin: 'top left',
                         margin: '0',
-                        padding: '20px',
-                        overflow: 'visible'
+                        padding: '20px'
                     }
                 };
 
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
-                if (!dataUrl) throw new Error("Empty dataUrl");
+                if (!dataUrl) throw new Error("Ошибка генерации изображения");
 
                 const link = document.createElement('a');
                 link.download = `Schedule_HI3_${Date.now()}.png`;
@@ -431,8 +426,8 @@
                 
                 btn.innerText = originalText;
             } catch (error) {
-                console.error('Screenshot error detail:', error);
-                btn.innerText = "❌ Ошибка безопасности";
+                console.error('Screenshot error:', error);
+                btn.innerText = "❌ Ошибка экспорта";
             } finally {
                 btn.disabled = false;
             }
