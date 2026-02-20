@@ -254,38 +254,34 @@
         };
 
         const imageCache = new Map();
-        const proxyServers = [
-            "https://corsproxy.io/?",
-            "https://api.allorigins.win/raw?url="
-        ];
 
         async function toDataURL(url) {
             if (!url) return "";
             if (imageCache.has(url)) return imageCache.get(url);
+
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
             
-            // Пытаемся загрузить напрямую или через прокси
-            const attempts = [url, ...proxyServers.map(p => p + encodeURIComponent(url))];
-            
-            for (const targetUrl of attempts) {
-                try {
-                    const response = await fetch(targetUrl);
-                    if (!response.ok) continue;
-                    const blob = await response.blob();
-                    return await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const result = reader.result;
-                            imageCache.set(url, result);
-                            resolve(result);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                } catch (e) {
-                    continue;
-                }
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Proxy error");
+                const data = await response.json();
+                
+                const rawProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                const rawRes = await fetch(rawProxy);
+                const blob = await rawRes.blob();
+                
+                return await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        imageCache.set(url, reader.result);
+                        resolve(reader.result);
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.warn("Failed to proxy image:", url);
+                return url; 
             }
-            return url; 
         }
 
         async function preloadAllImages() {
@@ -300,6 +296,7 @@
                 });
             });
             const uniqueUrls = [...new Set(urls)].filter(u => u && u.startsWith('http'));
+            
             await Promise.all(uniqueUrls.map(u => toDataURL(u)));
         }
 
@@ -340,8 +337,6 @@
                 }
                 tbody.appendChild(tr);
             });
-            
-            // Сначала прелоад, потом рендер
             await preloadAllImages();
             renderBanners();
         }
@@ -370,7 +365,6 @@
                         card.style.left = `${visualPadding}px`;
                         
                         const icons = item.icons || {};
-                        // Используем кэшированные Base64 или оригиналы
                         const mainSrc = imageCache.get(icons.main) || icons.main;
                         const rankSrc = imageCache.get(icons.rank) || icons.rank;
                         const typeSrc = imageCache.get(icons.type) || icons.type;
@@ -378,10 +372,10 @@
                         card.innerHTML = `
                             <div class="supply-assets">
                                 <div class="mini-icons-stack">
-                                    ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
-                                    ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.rank ? `<img src="${rankSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.type ? `<img src="${typeSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
                                 </div>
-                                ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
+                                ${icons.main ? `<img src="${mainSrc}" crossorigin="anonymous" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
                             </div>
                             <div class="supply-content"><span>${item.title}</span></div>
                         `;
@@ -401,14 +395,16 @@
             btn.disabled = true;
 
             try {
-                // Ждем отрисовку на всякий случай
+
                 renderBanners();
-                await new Promise(r => setTimeout(r, 500));
+                
+                await new Promise(r => setTimeout(r, 600));
 
                 const config = {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    cacheBust: true,
+                    skipFonts: false, 
+                    fontEmbedCSS: '',
                     style: {
                         margin: '0',
                         padding: '20px'
@@ -417,17 +413,32 @@
 
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
-                if (!dataUrl) throw new Error("Ошибка генерации изображения");
+                if (!dataUrl || dataUrl.length < 100) {
+                    throw new Error("Скриншот пустой или слишком мал");
+                }
 
                 const link = document.createElement('a');
-                link.download = `Schedule_HI3_${Date.now()}.png`;
+                link.download = `Schedule_HI3_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
                 
                 btn.innerText = originalText;
             } catch (error) {
-                console.error('Screenshot error:', error);
+                console.error('Screenshot error detail:', error);
                 btn.innerText = "❌ Ошибка экспорта";
+                if (confirm("Произошла ошибка CORS или шрифтов. Попробовать создать скриншот без шрифтов?")) {
+                    try {
+                        const dataUrlAlt = await window.htmlToImage.toPng(node, { ...config, skipFonts: true });
+                        const link = document.createElement('a');
+                        link.download = `Schedule_Simple.png`;
+                        link.href = dataUrlAlt;
+                        link.click();
+                    } catch (e) {
+                        console.error("Final fallback failed", e);
+                    }
+                }
             } finally {
                 btn.disabled = false;
             }
