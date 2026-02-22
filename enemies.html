@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enemies Schedule</title>
+    <title>Enemies Schedule - Persistent</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,19 +97,18 @@
 
         .boss-svg-container {
             position: absolute;
-            bottom: 0;
-            right: 0;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
             z-index: 50;
-            overflow: visible;
         }
 
         .boss-svg-text {
             font-family: 'Oswald', sans-serif;
             font-weight: 700;
-            font-size: 28px;
+            font-size: 20px;
             fill: white;
             stroke: black;
             stroke-width: 6px;
@@ -117,7 +116,6 @@
             paint-order: stroke fill;
             text-anchor: end;
             text-transform: uppercase;
-            transform: skewX(-12deg);
         }
 
         .type-badge {
@@ -191,6 +189,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         #bossModal {
@@ -252,6 +251,7 @@
     <div class="container mx-auto text-center">
         <div class="controls">
             <button onclick="addWeek()" class="px-6 py-2 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">Добавить неделю</button>
+            <button onclick="clearAllData()" class="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700">Сбросить таблицу</button>
             <button id="screenshotBtn" onclick="takeScreenshot()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">Скачать PNG</button>
         </div>
 
@@ -302,7 +302,7 @@
         <input type="file" id="hiddenFileInput" accept="image/*" onchange="loadCustomImage(this)" style="display:none">
     </div>
 
-    <script>
+     <script>
         const ABYSS_LIBRARY = [
             { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/15/"Lantern"_%28Enemy%29_%28Icon%29.png' },
             { name: "Flux", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4b/"Lantern"_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
@@ -412,41 +412,110 @@
 
         let currentEditingCell = null;
         let isAbyssCell = false;
-        let weekCount = 0;
+        const STORAGE_KEY = 'hi3_scheduler_data';
 
-        function addWeek() {
-            weekCount++;
-            const tbody = document.getElementById('tableBody');
-            const row = document.createElement('tr');
-            row.id = `week-row-${weekCount}`;
-            
-            row.innerHTML = `
-                <td class="week-col">
-                    <div class="week-num">${weekCount}</div>
-                    <input type="text" class="week-date-input" placeholder="ДАТА">
-                    <div onclick="deleteRow(${weekCount})" class="btn-delete">Удалить</div>
-                </td>
-                <td>${createBossCell(false, '', true)}</td>
-                <td>${createBossCell(false, '', true)}</td>
-                <td>${createBossCell(true, 'SSS', false)}</td>
-                <td>${createBossCell(true, 'SSS', false)}</td>
-                <td>${createBossCell(true, 'SS', false)}</td>
-            `;
-            tbody.appendChild(row);
+
+        function saveData() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const data = Array.from(rows).map(row => {
+                const cells = row.querySelectorAll('.boss-cell');
+                const weekData = {
+                    date: row.querySelector('.week-date-input').value,
+                    num: row.querySelector('.week-num').textContent,
+                    cells: Array.from(cells).map(cell => ({
+                        bg: cell.style.backgroundImage,
+                        text: cell.querySelector('.boss-svg-text').textContent.trim()
+                    }))
+                };
+                return weekData;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        function createBossCell(withBadge, badgeText = '', isAbyss = false) {
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) {
+                addWeek();
+                return;
+            }
+            const data = JSON.parse(saved);
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((week, index) => {
+                const row = createRowElement(index + 1, week.date);
+                const cells = row.querySelectorAll('.boss-cell');
+                
+                week.cells.forEach((cellData, i) => {
+                    if (cellData.bg) cells[i].style.backgroundImage = cellData.bg;
+                    cells[i].querySelector('.boss-svg-text').textContent = cellData.text;
+                });
+                tbody.appendChild(row);
+            });
+        }
+
+        function clearAllData() {
+            if (confirm("Вы уверены, что хотите полностью очистить таблицу?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.getElementById('tableBody').innerHTML = '';
+                addWeek();
+            }
+        }
+
+
+        function createRowElement(num, dateValue = '') {
+            const row = document.createElement('tr');
+            row.className = 'week-row';
+            row.innerHTML = `
+                <td class="week-col">
+                    <div class="week-num">${num}</div>
+                    <input type="text" class="week-date-input" placeholder="ДАТА" value="${dateValue}" oninput="saveData()">
+                    <div onclick="deleteRow(this)" class="btn-delete">Удалить</div>
+                </td>
+                <td>${createBossCellMarkup(false, '', true)}</td>
+                <td>${createBossCellMarkup(false, '', true)}</td>
+                <td>${createBossCellMarkup(true, 'SSS', false)}</td>
+                <td>${createBossCellMarkup(true, 'SSS', false)}</td>
+                <td>${createBossCellMarkup(true, 'SS', false)}</td>
+            `;
+            
+            row.querySelectorAll('.boss-cell').forEach((cell, i) => {
+                const isAbyss = i < 2;
+                cell.onclick = () => openBossModal(cell, isAbyss);
+            });
+
+            return row;
+        }
+
+        function addWeek() {
+            const tbody = document.getElementById('tableBody');
+            const newNum = tbody.children.length + 1;
+            const row = createRowElement(newNum);
+            tbody.appendChild(row);
+            saveData();
+        }
+
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
+            document.querySelectorAll('#tableBody .week-num').forEach((el, idx) => {
+                el.textContent = idx + 1;
+            });
+            saveData();
+        }
+
+        function createBossCellMarkup(withBadge, badgeText = '', isAbyss = false) {
             return `
-                <div class="boss-cell" onclick="openBossModal(this, ${isAbyss})">
+                <div class="boss-cell">
                     ${withBadge ? `<div class="type-badge">${badgeText}</div>` : ''}
                     <div class="boss-svg-container">
-                        <svg width="100%" height="100%" viewBox="0 0 250 120" style="overflow:visible">
-                            <text x="245" y="115" class="boss-svg-text"></text>
+                        <svg width="220" height="120" viewBox="0 0 220 120" style="display:block;">
+                            <text x="212" y="112" class="boss-svg-text" transform="skewX(-12) translate(22, 0)"> </text>
                         </svg>
                     </div>
                 </div>
             `;
         }
+
 
         function openBossModal(cell, abyssMode) {
             currentEditingCell = cell;
@@ -455,48 +524,32 @@
             const modal = document.getElementById('bossModal');
             const listContainer = document.getElementById('bossList');
             const inputContainer = document.getElementById('nameInputContainer');
-            const modalTitle = document.getElementById('modalTitle');
-            const libTag = document.getElementById('modalLibraryType');
             
             listContainer.innerHTML = '';
+            inputContainer.style.display = isAbyssCell ? "block" : "none";
+            document.getElementById('modalTitle').innerText = isAbyssCell ? "Выбор погоды" : "Выбор босса";
             
             if (isAbyssCell) {
-                modalTitle.innerText = "Выбор босса";
-                libTag.innerText = "Бездна";
-                inputContainer.style.display = "block";
-                document.getElementById('customBossName').value = cell.querySelector('.boss-svg-text').textContent;
-                
-                renderLibrary(ABYSS_LIBRARY, listContainer);
-            } else {
-                modalTitle.innerText = "Выбор босса";
-                libTag.innerText = "Арена";
-                inputContainer.style.display = "none";
-                
-                renderLibrary(MA_LIBRARY, listContainer);
+                document.getElementById('customBossName').value = cell.querySelector('.boss-svg-text').textContent.trim();
             }
+
+            const library = isAbyssCell ? ABYSS_LIBRARY : MA_LIBRARY;
+            library.forEach(item => {
+                const opt = document.createElement('div');
+                opt.className = 'boss-option';
+                opt.onclick = () => selectItem(item);
+                opt.innerHTML = `
+                    <img src="${item.image}" alt="">
+                    <span class="font-bold text-slate-700 uppercase">${item.name || 'Босс'}</span>
+                `;
+                listContainer.appendChild(opt);
+            });
 
             modal.style.display = 'block';
         }
 
-        function renderLibrary(library, container) {
-            library.forEach(item => {
-                const opt = document.createElement('div');
-                opt.className = 'boss-option';
-                opt.onclick = (e) => {
-                    e.stopPropagation();
-                    selectItem(item);
-                };
-                opt.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70x40?text=Error'">
-                    <span class="font-bold text-slate-700 uppercase">${item.name}</span>
-                `;
-                container.appendChild(opt);
-            });
-        }
-
         function selectItem(item) {
             if (!currentEditingCell) return;
-
             const textElement = currentEditingCell.querySelector('.boss-svg-text');
             
             if (isAbyssCell) {
@@ -508,10 +561,7 @@
 
             currentEditingCell.style.backgroundImage = `url('${item.image}')`;
             closeModal();
-        }
-
-        function triggerFileInput() {
-            document.getElementById('hiddenFileInput').click();
+            saveData();
         }
 
         function loadCustomImage(input) {
@@ -520,16 +570,12 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     currentEditingCell.style.backgroundImage = `url('${e.target.result}')`;
-                    
                     if (isAbyssCell) {
                         const customName = document.getElementById('customBossName').value.trim();
-                        if (customName) {
-                            currentEditingCell.querySelector('.boss-svg-text').textContent = customName;
-                        }
-                    } else {
-                        currentEditingCell.querySelector('.boss-svg-text').textContent = "";
+                        currentEditingCell.querySelector('.boss-svg-text').textContent = customName;
                     }
                     closeModal();
+                    saveData();
                 };
                 reader.readAsDataURL(file);
             }
@@ -539,53 +585,44 @@
             document.getElementById('bossModal').style.display = 'none';
         }
 
-        function deleteRow(id) {
-            const row = document.getElementById(`week-row-${id}`);
-            if(row) row.remove();
+        function triggerFileInput() {
+            document.getElementById('hiddenFileInput').click();
         }
+
 
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
-            const scrollContainer = document.getElementById('scroll-container');
             const btn = document.getElementById('screenshotBtn');
-            
-            if (!node || !btn || !window.htmlToImage) return;
+            if (!node || !btn) return;
 
             const originalText = btn.innerText;
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
 
-            const oldScrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
-            if (scrollContainer) scrollContainer.scrollLeft = 0;
-
             try {
                 node.classList.add('exporting');
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 600));
 
-                const config = {
+                const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
-                    backgroundColor: '#0f172a'
-                };
-
-                const dataUrl = await window.htmlToImage.toPng(node, config);
+                    backgroundColor: '#0f172a',
+                    cacheBust: true
+                });
                 
                 const link = document.createElement('a');
-                link.download = `HI3_Schedule_${new Date().toISOString().slice(0,10)}.png`;
+                link.download = `Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
-                
-                btn.innerText = originalText;
-            } catch (error) {
-                console.error('Screenshot failed:', error);
-                btn.innerText = "❌ Ошибка";
+            } catch (e) {
+                console.error(e);
             } finally {
-                if (scrollContainer) scrollContainer.scrollLeft = oldScrollLeft;
                 node.classList.remove('exporting');
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
 
-        window.onload = () => addWeek();
+        window.onload = loadData;
     </script>
 </body>
 </html>
