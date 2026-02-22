@@ -360,14 +360,12 @@
             btn.disabled = true;
 
             try {
-                // Небольшая задержка для уверенности, что все DOM элементы на месте
                 await new Promise(r => setTimeout(r, 100));
 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
                     cacheBust: true,
-                    // Помогаем библиотеке понять, что мы работаем с CORS-объектами
                     includeQueryParams: true
                 });
                 
@@ -377,7 +375,7 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot failed:', error);
-                alert("Ошибка при создании скриншота. Попробуйте еще раз.");
+                alert("Ошибка при создании скриншота. Попробуйте ещё раз.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
