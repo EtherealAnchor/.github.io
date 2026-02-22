@@ -118,7 +118,6 @@
             z-index: 10;
             border-radius: 10px;
             overflow: hidden;
-            transition: width 0.2s ease, left 0.2s ease;
         }
 
         .supply-assets {
@@ -178,7 +177,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold">Загрузка ресурсов...</p>
+        <p class="text-white font-bold">Синхронизация ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -208,6 +207,8 @@
         const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
+        const PROXY_URL = "https://corsproxy.io/?";
+
         const supplyData = {
             "Боевой костюм А": [{ title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } }],
             "Боевой костюм Б": [{ title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
@@ -235,24 +236,23 @@
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
 
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&ts=${Date.now()}`;
+            const proxyUrl = `${PROXY_URL}${encodeURIComponent(url)}`;
             
             try {
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error("Fetch failed");
+                if (!response.ok) throw new Error("CORS error");
                 const blob = await response.blob();
                 
-                return await new Promise((resolve) => {
+                const base64 = await new Promise((resolve) => {
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const base64 = reader.result;
-                        imageCache.set(url, base64);
-                        resolve(base64);
-                    };
+                    reader.onloadend = () => resolve(reader.result);
                     reader.readAsDataURL(blob);
                 });
+                
+                imageCache.set(url, base64);
+                return base64;
             } catch (e) {
-                console.warn("Proxy failed for:", url, "using direct link as fallback.");
+                console.error("Proxy failed for:", url);
                 return url;
             }
         }
@@ -270,9 +270,9 @@
             });
 
             const uniqueUrls = [...new Set(urls)];
+            
             await Promise.all(uniqueUrls.map(u => fetchImageAsDataURL(u)));
             
-            // Скрываем загрузчик
             const loader = document.getElementById('loading-overlay');
             loader.style.opacity = '0';
             setTimeout(() => loader.style.display = 'none', 500);
@@ -338,10 +338,10 @@
                         card.innerHTML = `
                             <div class="supply-assets">
                                 <div class="mini-icons-stack">
-                                    ${icons.rank ? `<img src="${rankSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
-                                    ${icons.type ? `<img src="${typeSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
                                 </div>
-                                ${icons.main ? `<img src="${mainSrc}" crossorigin="anonymous" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
+                                ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
                             </div>
                             <div class="supply-content"><span>${item.title}</span></div>
                         `;
@@ -356,26 +356,24 @@
             const btn = document.getElementById('screenshotBtn');
             if (!node || !window.htmlToImage) return;
 
-            btn.innerText = "⌛ Сохранение...";
+            btn.innerText = "⌛ Обработка...";
             btn.disabled = true;
 
             try {
-                await new Promise(r => setTimeout(r, 100));
-
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    cacheBust: true,
-                    includeQueryParams: true
+                    cacheBust: false,
+                    quality: 1.0
                 });
                 
                 const link = document.createElement('a');
-                link.download = `HI3_Schedule_${new Date().toLocaleDateString()}.png`;
+                link.download = `Schedule_${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (error) {
-                console.error('Screenshot failed:', error);
-                alert("Ошибка при создании скриншота. Попробуйте ещё раз.");
+                console.error('Screenshot error:', error);
+                alert("Не удалось создать скриншот. Попробуйте обновить страницу.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
