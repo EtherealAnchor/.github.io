@@ -193,7 +193,7 @@
             justify-content: center;
         }
 
-        #textModal {
+        #bossModal {
             display: none;
             position: fixed;
             top: 50%;
@@ -204,7 +204,40 @@
             border-radius: 12px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            width: 350px;
+            width: 450px;
+        }
+
+        .boss-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .boss-option:hover {
+            background: #f1f5f9;
+        }
+
+        .boss-option img {
+            width: 70px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #cbd5e1;
+        }
+
+        .modal-header-tag {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
     </style>
 </head>
@@ -243,17 +276,142 @@
         </div>
     </div>
 
-    <div id="textModal">
-        <h3 class="font-bold mb-2 text-slate-800">Погода</h3>
-        <input type="text" id="cellTextInput" class="border p-2 w-full mb-4 rounded text-black uppercase" placeholder="BOSS NAME">
-        <div class="flex justify-end gap-2">
-            <button onclick="closeModal()" class="px-4 py-2 text-slate-500">Отмена</button>
-            <button onclick="saveCellText()" class="px-4 py-2 bg-blue-600 text-white rounded">ОК</button>
+    <div id="bossModal">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="font-bold text-slate-800 text-lg" id="modalTitle">Выбор</h3>
+                <span id="modalLibraryType" class="modal-header-tag">Библиотека</span>
+            </div>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">&times;</button>
         </div>
+        
+        <div id="nameInputContainer" class="mb-4">
+            <label class="block text-sm font-bold text-slate-600 mb-1">Название погоды:</label>
+            <input type="text" id="customBossName" class="border p-2 w-full rounded text-black uppercase" placeholder="Введите название...">
+        </div>
+
+        <div class="max-h-80 overflow-y-auto border rounded p-2 bg-slate-50" id="bossList">
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <button onclick="triggerFileInput()" class="text-blue-600 text-sm font-bold hover:underline">Загрузить свой файл</button>
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 rounded font-bold text-slate-700">Закрыть</button>
+            </div>
+        </div>
+        <input type="file" id="hiddenFileInput" accept="image/*" onchange="loadCustomImage(this)" style="display:none">
     </div>
 
     <script>
+        const ABYSS_LIBRARY = [
+            { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/15/"Lantern"_%28Enemy%29_%28Icon%29.png' },
+            { name: "Flux", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4b/"Lantern"_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/6d/"Perception"_%28Enemy%29_%28Icon%29.png' },
+            { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/44/Abyssal_Shadow_%28Enemy%29_%28Icon%29.png' },
+            { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ed/Aesir_Baldr_%28Enemy%29_%28Icon%29.png' },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/67/Aesir_Heimdall_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d6/Alien_Guard_-_Amendment_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4c/Alien_Guard_-_Supplement_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0a/Alien_Guard_-_Purification_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4c/Alien_Guard_-_Supplement_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Ancient_Mech_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c7/Argent_Knight_-_Artemis_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7a/Assaka_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/cb/Beast_of_Sacrifice_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/73/Benares_%28Enemy%29_%28Icon%29.png" },
+            { name: "Симфония", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/86/Benares_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "Ледяной", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/73/Benares_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/73/Benares_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5e/Black_Wine_of_Theramenes_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/ff/Bright_Knight_-_Excelsis_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c1/Deliverance_Kevin_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f2/Cruising_Tribunal_%28Enemy%29_%28Icon%29.png" },
+            { name: "Господство", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f2/Cruising_Tribunal_%28Enemy%29_%28Icon%29.png" },
+            { name: "Симфония", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/9c/Diabolic_Kevin_%28Enemy%29_%28Icon%29.png" },
+            { name: "Электрический", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1d/Dominator_of_Wolves_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0b/False_God_Otto_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/34/Flame-Chaser_-_Kosma_%28Enemy%29_%28Icon%29.png" },
+            { name: "Кровотечение", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/dc/Flame-Chaser_-_Vill-V_%28Enemy%29_%28Icon%29.png" },
+            { name: "Дальние атаки", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4e/Flame-Chaser_-_Kalpas_%28Ranged%29_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/96/Shadow_Knight_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1a/Hellmaru_%28Enemy%29_%28Icon%29.png" },
+            { name: "Дальние атаки", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/67/Hephaestus_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/a9/Herrscher_of_Corruption_%28Enemy%29_%28Icon%29.png" },
+            { name: "Кровотечение", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5e/Herrscher_of_Sentience_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Herrscher_of_the_Rimestar_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f3/HOMU_King_%28Enemy%29_%28Icon%29.png" },
+            { name: "Электрический", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/82/Husk_-_Existentialism_%28Enemy%29_%28Abyss%29_%28Icon%29.png" },
+            { name: "Мнимый", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7f/Husk_-_Mysticism_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f4/Husk_-_Nihilius_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5a/Jizo_Mitama_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/3b/Kallen_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/3b/Li_Sushang_%28Enemy%29_%28Icon%29.png" },
+            { name: "Огненный", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/39/Litost_·_Cinders_of_the_Night_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fc/Meteoroid_-_Paros_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/2/28/MHT-3B_Nirvana_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/67/Hephaestus_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "Кровотечение", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fa/Pishacha_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/af/Raven_%28Frost%29_%28Enemy%29_%28Icon%29.png" },
+            { name: "", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d1/Sa_-_Wheel_of_Transcendence_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "Физический", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c7/Storm_Templar_%28Physical%29_%28Enemy%29_%28Icon%29.png" },
+            { name: "Огненный", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Tonatiuh_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { name: "Эхо", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/81/Vita_-_Sea%27s_Depths_%28Enemy%29_%28SSS%29_%28Icon%29.png" }
+        ];
+
+        const MA_LIBRARY = [
+            { name: "Lantern", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4b/"Lantern"_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "AKA", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4c/Argent_Knight_-_Artemis_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Benares", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/86/Benares_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Heimdall", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/9d/Aesir_Heimdall_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Houdou", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f6/Beast_of_Yang_-_Huodou_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Bright Knight", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f9/Bright_Knight_-_Excelsis_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Dominator of Wolves", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ef/Dominator_of_Wolves_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "False God Otto", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0b/False_God_Otto_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5f/Flame-Chaser_-_Aponia_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/6c/Flame-Chaser_-_Mobius_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/34/Flame-Chaser_-_Kosma_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/67/Hephaestus_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/93/Herrscher_of_the_Rimestar_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/8e/HoD_Minion_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/55/Husk_-_Existentialism_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7f/Husk_-_Mysticism_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b8/Husk_-_Nihilius_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/05/Jizo_Mitama_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c1/Deliverance_Kevin_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/39/Litost_·_Cinders_of_the_Night_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d6/MHT-3B_Nirvana_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d8/Marut_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/97/Masked_Fool_Sampo_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/e6/Meteoroid_-_Guaymas_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fc/Meteoroid_-_Paros_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f6/Meteroid_-_Epernay_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/80/Parvati_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fa/Pishacha_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d1/Sa_-_Wheel_of_Transcendence_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/54/Sprout_of_Wishing_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Tonatiuh_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/2/20/Valrahal_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/81/Vita_-_Sea%27s_Depths_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1c/Wardens_of_Tower_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4c/Alien_Guard_-_Supplement_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7a/Assaka_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/cf/Blood_Rose_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/14/Dark_Jixuanyuan_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/14/Deathly_Doom_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f3/HOMU_King_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1a/Hellmaru_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/56/Herrscher_Kiana_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/3b/Kallen_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/e1/MHT-3_Pax_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/ff/Mexicatl_-_Umbreist_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/f0/Padrino_MFG_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/e2/RPC-6626_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/96/Shadow_Knight_%28Enemy%29_%28Icon%29.png" },
+            { image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/48/Yae_Kasumi_%28Enemy%29_%28Icon%29.png" }
+        ];
+
         let currentEditingCell = null;
+        let isAbyssCell = false;
         let weekCount = 0;
 
         function addWeek() {
@@ -268,66 +426,117 @@
                     <input type="text" class="week-date-input" placeholder="ДАТА">
                     <div onclick="deleteRow(${weekCount})" class="btn-delete">Удалить</div>
                 </td>
-                <td>${createBossCell(false)}</td>
-                <td>${createBossCell(false)}</td>
-                <td>${createBossCell(true, 'SSS')}</td>
-                <td>${createBossCell(true, 'SSS')}</td>
-                <td>${createBossCell(true, 'SS')}</td>
+                <td>${createBossCell(false, '', true)}</td>
+                <td>${createBossCell(false, '', true)}</td>
+                <td>${createBossCell(true, 'SSS', false)}</td>
+                <td>${createBossCell(true, 'SSS', false)}</td>
+                <td>${createBossCell(true, 'SS', false)}</td>
             `;
             tbody.appendChild(row);
         }
 
-        function createBossCell(withBadge, badgeText = '') {
+        function createBossCell(withBadge, badgeText = '', isAbyss = false) {
             return `
-                <div class="boss-cell" onclick="handleCellClick(this, event)">
+                <div class="boss-cell" onclick="openBossModal(this, ${isAbyss})">
                     ${withBadge ? `<div class="type-badge">${badgeText}</div>` : ''}
                     <div class="boss-svg-container">
                         <svg width="100%" height="100%" viewBox="0 0 250 120" style="overflow:visible">
                             <text x="245" y="115" class="boss-svg-text"></text>
                         </svg>
                     </div>
-                    <input type="file" accept="image/*" onchange="loadImage(this)" style="display:none">
                 </div>
             `;
         }
 
-        function handleCellClick(cell, event) {
-            if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
-                openTextModal(cell);
+        function openBossModal(cell, abyssMode) {
+            currentEditingCell = cell;
+            isAbyssCell = abyssMode;
+            
+            const modal = document.getElementById('bossModal');
+            const listContainer = document.getElementById('bossList');
+            const inputContainer = document.getElementById('nameInputContainer');
+            const modalTitle = document.getElementById('modalTitle');
+            const libTag = document.getElementById('modalLibraryType');
+            
+            listContainer.innerHTML = '';
+            
+            if (isAbyssCell) {
+                modalTitle.innerText = "Выбор босса";
+                libTag.innerText = "Бездна";
+                inputContainer.style.display = "block";
+                document.getElementById('customBossName').value = cell.querySelector('.boss-svg-text').textContent;
+                
+                renderLibrary(ABYSS_LIBRARY, listContainer);
             } else {
-                cell.querySelector('input[type="file"]').click();
+                modalTitle.innerText = "Выбор босса";
+                libTag.innerText = "Арена";
+                inputContainer.style.display = "none";
+                
+                renderLibrary(MA_LIBRARY, listContainer);
             }
+
+            modal.style.display = 'block';
         }
 
-        function loadImage(input) {
+        function renderLibrary(library, container) {
+            library.forEach(item => {
+                const opt = document.createElement('div');
+                opt.className = 'boss-option';
+                opt.onclick = (e) => {
+                    e.stopPropagation();
+                    selectItem(item);
+                };
+                opt.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70x40?text=Error'">
+                    <span class="font-bold text-slate-700 uppercase">${item.name}</span>
+                `;
+                container.appendChild(opt);
+            });
+        }
+
+        function selectItem(item) {
+            if (!currentEditingCell) return;
+
+            const textElement = currentEditingCell.querySelector('.boss-svg-text');
+            
+            if (isAbyssCell) {
+                const customName = document.getElementById('customBossName').value.trim();
+                textElement.textContent = customName || item.name;
+            } else {
+                textElement.textContent = "";
+            }
+
+            currentEditingCell.style.backgroundImage = `url('${item.image}')`;
+            closeModal();
+        }
+
+        function triggerFileInput() {
+            document.getElementById('hiddenFileInput').click();
+        }
+
+        function loadCustomImage(input) {
             const file = input.files[0];
-            if (file) {
+            if (file && currentEditingCell) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    input.parentElement.style.backgroundImage = `url(${e.target.result})`;
+                    currentEditingCell.style.backgroundImage = `url('${e.target.result}')`;
+                    
+                    if (isAbyssCell) {
+                        const customName = document.getElementById('customBossName').value.trim();
+                        if (customName) {
+                            currentEditingCell.querySelector('.boss-svg-text').textContent = customName;
+                        }
+                    } else {
+                        currentEditingCell.querySelector('.boss-svg-text').textContent = "";
+                    }
+                    closeModal();
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        function openTextModal(cell) {
-            currentEditingCell = cell;
-            const currentText = cell.querySelector('.boss-svg-text').textContent;
-            document.getElementById('cellTextInput').value = currentText;
-            document.getElementById('textModal').style.display = 'block';
-            document.getElementById('cellTextInput').focus();
-        }
-
         function closeModal() {
-            document.getElementById('textModal').style.display = 'none';
-        }
-
-        function saveCellText() {
-            if (currentEditingCell) {
-                const textValue = document.getElementById('cellTextInput').value;
-                currentEditingCell.querySelector('.boss-svg-text').textContent = textValue;
-            }
-            closeModal();
+            document.getElementById('bossModal').style.display = 'none';
         }
 
         function deleteRow(id) {
@@ -360,8 +569,6 @@
 
                 const dataUrl = await window.htmlToImage.toPng(node, config);
                 
-                if (!dataUrl) throw new Error("Image generation failed");
-
                 const link = document.createElement('a');
                 link.download = `HI3_Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
