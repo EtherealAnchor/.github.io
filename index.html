@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Информационный портал</title>
+    <title>Расписание</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,13 +18,8 @@
             padding: 0;
             overflow-x: hidden;
         }
-        body::-webkit-scrollbar {
-            display: none;
-        }
-        body {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
 
         .nav-container {
             display: flex;
@@ -47,36 +42,15 @@
             display: inline-block;
         }
 
-        .nav-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
+        .nav-button:hover { background: rgba(255, 255, 255, 0.2); }
         .nav-button.active {
             background: #9d1c8c;
             border-color: pink;
             box-shadow: 0 0 15px rgba(157, 28, 140, 0.5);
         }
 
-        .screenshot-button {
-            background: #27ae60;
-            color: white;
-            border-color: #2ecc71;
-        }
-        .screenshot-button:hover {
-            background: #219150;
-        }
-        .screenshot-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .page-section {
-            display: none;
-        }
-
-        .page-section.active {
-            display: block;
-        }
+        .screenshot-button { background: #27ae60; color: white; border-color: #2ecc71; }
+        .screenshot-button:hover { background: #219150; }
 
         .table-container {
             max-width: 1600px;
@@ -111,20 +85,8 @@
             border-radius: 8px;
         }
 
-        .week-name {
-            display: block;
-            font-weight: 900;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .week-dates {
-            display: block;
-            font-size: 0.7rem;
-            font-weight: 600;
-            opacity: 0.7;
-            margin-top: 1px;
-        }
+        .week-name { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; display: block; }
+        .week-dates { font-size: 0.7rem; font-weight: 600; opacity: 0.7; margin-top: 1px; display: block; }
 
         .category-cell {
             background: rgba(0, 0, 0, 0.4);
@@ -150,7 +112,6 @@
             height: 85px;
             display: flex;
             align-items: center;
-            flex-direction: row; 
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -176,19 +137,8 @@
             justify-content: center;
         }
 
-        .mini-icon {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            background: #73486F;
-        }
-
-        .main-icon {
-            width: 74px;
-            height: 74px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
+        .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 4px; }
+        .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -210,12 +160,29 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
     </style>
 </head>
 <body>
 
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-500 mb-4"></div>
+        <p class="text-white font-bold">Загрузка ресурсов...</p>
+    </div>
+
     <nav class="nav-container">
-        <button id="nav-schedule" class="nav-button active" onclick="switchTab('schedule')">Расписание</button>
+        <button id="nav-schedule" class="nav-button active">Расписание</button>
         <a href="enemies.html" class="nav-button">Боссы</a>
         <a href="er.html" class="nav-button">Царство Элизиума</a>
         <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">Создать скриншот</button>
@@ -264,59 +231,56 @@
 
         const imageCache = new Map();
 
-        async function toDataURL(url) {
+        async function fetchImageAsDataURL(url) {
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
-            
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&ts=${Date.now()}`;
             
             try {
-                const response = await fetch(proxyUrl, { cache: 'no-cache' });
-                if (!response.ok) throw new Error("Network error");
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Fetch failed");
                 const blob = await response.blob();
                 
                 return await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        const base64data = reader.result;
-                        imageCache.set(url, base64data);
-                        renderBanners(); 
-                        resolve(base64data);
+                        const base64 = reader.result;
+                        imageCache.set(url, base64);
+                        resolve(base64);
                     };
                     reader.readAsDataURL(blob);
                 });
             } catch (e) {
-                console.error("CORS Proxy failed for:", url, e);
-                return url; 
+                console.warn("Proxy failed for:", url, "using direct link as fallback.");
+                return url;
             }
         }
 
-        async function preloadAllImages() {
+        async function preloadResources() {
             const urls = [];
             Object.values(supplyData).forEach(cat => {
                 cat.forEach(item => {
                     if (item.icons) {
-                        if (item.icons.main) urls.push(item.icons.main);
-                        if (item.icons.rank) urls.push(item.icons.rank);
-                        if (item.icons.type) urls.push(item.icons.type);
+                        ['main', 'rank', 'type'].forEach(k => {
+                            if (item.icons[k]) urls.push(item.icons[k]);
+                        });
                     }
                 });
             });
-            const uniqueUrls = [...new Set(urls)].filter(u => u && u.startsWith('http'));
-            uniqueUrls.forEach(u => toDataURL(u));
+
+            const uniqueUrls = [...new Set(urls)];
+            await Promise.all(uniqueUrls.map(u => fetchImageAsDataURL(u)));
+            
+            // Скрываем загрузчик
+            const loader = document.getElementById('loading-overlay');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 500);
+            
+            renderBanners();
         }
 
-        function switchTab(pageId) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            const targetSection = document.getElementById(pageId + '-page');
-            const targetButton = document.getElementById('nav-' + pageId);
-            if (targetSection) targetSection.classList.add('active');
-            if (targetButton) targetButton.classList.add('active');
-            if (pageId === 'schedule') renderBanners();
-        }
-
-        async function initTable() {
+        function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
             headerRow.innerHTML = '<th style="width: 180px;"></th>';
@@ -331,10 +295,7 @@
             
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
-                const catTd = document.createElement('td');
-                catTd.className = 'category-cell';
-                catTd.innerText = cat;
-                tr.appendChild(catTd);
+                tr.innerHTML = `<td class="category-cell">${cat}</td>`;
                 for (let i = 1; i <= totalWeeks; i++) {
                     const td = document.createElement('td');
                     td.className = 'content-cell';
@@ -344,14 +305,10 @@
                 tbody.appendChild(tr);
             });
             
-            preloadAllImages();
-            renderBanners();
+            preloadResources();
         }
 
         function renderBanners() {
-            const schedulePage = document.getElementById('schedule-page');
-            if (!schedulePage || !schedulePage.classList.contains('active')) return;
-            
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
             
             categories.forEach(cat => {
@@ -364,11 +321,11 @@
                     if (startCell && endCell) {
                         const card = document.createElement('div');
                         card.className = 'supply-card';
-                        const visualPadding = 4; 
                         
                         const leftPos = startCell.offsetLeft;
                         const rightPos = endCell.offsetLeft + endCell.offsetWidth;
                         const totalWidthPx = rightPos - leftPos;
+                        const visualPadding = 4;
                         
                         card.style.width = `${totalWidthPx - (visualPadding * 2)}px`;
                         card.style.left = `${visualPadding}px`;
@@ -384,7 +341,7 @@
                                     ${icons.rank ? `<img src="${rankSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
                                     ${icons.type ? `<img src="${typeSrc}" crossorigin="anonymous" class="mini-icon">` : '<div style="height:32px"></div>'}
                                 </div>
-                                ${icons.main ? `<img src="${mainSrc}" crossorigin="anonymous" class="main-icon">` : '<div style="width:74px; background:#ccc; border-radius:4px"></div>'}
+                                ${icons.main ? `<img src="${mainSrc}" crossorigin="anonymous" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
                             </div>
                             <div class="supply-content"><span>${item.title}</span></div>
                         `;
@@ -396,51 +353,39 @@
 
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
-            const scrollContainer = document.getElementById('scroll-container');
             const btn = document.getElementById('screenshotBtn');
-            
             if (!node || !window.htmlToImage) return;
 
-            const originalText = btn.innerText;
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
 
-            const oldScrollLeft = scrollContainer.scrollLeft;
-            scrollContainer.scrollLeft = 0;
-
             try {
-                await new Promise(r => setTimeout(r, 200));
+                // Небольшая задержка для уверенности, что все DOM элементы на месте
+                await new Promise(r => setTimeout(r, 100));
 
-                const config = {
+                const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    skipFonts: false,
-                    width: node.offsetWidth,
-                    height: node.offsetHeight,
-                    fontEmbedCSS: document.styleSheets[2] ? "" : undefined 
-                };
-
-                const dataUrl = await window.htmlToImage.toPng(node, config);
+                    cacheBust: true,
+                    // Помогаем библиотеке понять, что мы работаем с CORS-объектами
+                    includeQueryParams: true
+                });
                 
-                if (!dataUrl || dataUrl.length < 500) throw new Error("Invalid image");
-
                 const link = document.createElement('a');
                 link.download = `HI3_Schedule_${new Date().toLocaleDateString()}.png`;
                 link.href = dataUrl;
                 link.click();
-                
-                btn.innerText = originalText;
             } catch (error) {
                 console.error('Screenshot failed:', error);
-                btn.innerText = "❌ Ошибка";
+                alert("Ошибка при создании скриншота. Попробуйте еще раз.");
             } finally {
-                scrollContainer.scrollLeft = oldScrollLeft;
+                btn.innerText = "Создать скриншот";
                 btn.disabled = false;
             }
         }
 
         window.onload = initTable;
-        window.onresize = renderBanners;
+        window.addEventListener('resize', renderBanners);
     </script>
 </body>
 </html>
