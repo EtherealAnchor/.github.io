@@ -138,6 +138,7 @@
 
         .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 4px; }
         .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
+        .extra-icon { width: 140px; height: 74px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -174,7 +175,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold">Синхронизация ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Синхронизация ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -204,7 +205,11 @@
         const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
-        const PROXY_URL = "https://corsproxy.io/?";
+        const PROXIES = [
+            "https://corsproxy.io/?",
+            "https://api.allorigins.win/raw?url=",
+            "https://thingproxy.freeboard.io/fetch/"
+        ];
 
         const supplyData = {
             "Боевой костюм А": [
@@ -230,27 +235,42 @@
                 { title: '<span class="text-md">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
                 { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-            "Карнавал А": [{ title: '<span class="text-md">Ротация: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: {} }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: {} }],
+
+            "Карнавал А": [{ title: '<span class="text-md">Ротация: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
             "Наряд": [
-                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "images/cnELy.png" } },
+                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png" } },
                 { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
 
         const imageCache = new Map();
 
+        async function fetchWithRetry(url, proxies = PROXIES, retries = 3) {
+            for (let proxy of proxies) {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const targetUrl = `${proxy}${encodeURIComponent(url)}`;
+                        const response = await fetch(targetUrl, { 
+                            cache: 'force-cache' 
+                        });
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return await response.blob();
+                    } catch (e) {
+                        if (i === retries - 1) break;
+                        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                    }
+                }
+            }
+            throw new Error(`Failed to load ${url} after trying all proxies.`);
+        }
+
         async function fetchImageAsDataURL(url) {
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
-
-            const proxyUrl = `${PROXY_URL}${encodeURIComponent(url)}`;
             
             try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error("CORS error");
-                const blob = await response.blob();
-                
+                const blob = await fetchWithRetry(url);
                 const base64 = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
@@ -260,8 +280,8 @@
                 imageCache.set(url, base64);
                 return base64;
             } catch (e) {
-                console.error("Proxy failed for:", url);
-                return url;
+                console.error("Critical image load failure:", url, e);
+                return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             }
         }
 
@@ -270,7 +290,7 @@
             Object.values(supplyData).forEach(cat => {
                 cat.forEach(item => {
                     if (item.icons) {
-                        ['main', 'rank', 'type'].forEach(k => {
+                        ['main', 'rank', 'type', 'extra'].forEach(k => {
                             if (item.icons[k]) urls.push(item.icons[k]);
                         });
                     }
@@ -278,8 +298,22 @@
             });
 
             const uniqueUrls = [...new Set(urls)];
+            const loadingText = document.getElementById('loading-text');
             
-            await Promise.all(uniqueUrls.map(u => fetchImageAsDataURL(u)));
+            const chunks = [];
+            const chunkSize = 4;
+            for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
+                chunks.push(uniqueUrls.slice(i, i + chunkSize));
+            }
+
+            let loaded = 0;
+            for (const chunk of chunks) {
+                await Promise.all(chunk.map(async u => {
+                    await fetchImageAsDataURL(u);
+                    loaded++;
+                    loadingText.innerText = `Загрузка: ${Math.round((loaded / uniqueUrls.length) * 100)}%`;
+                }));
+            }
             
             const loader = document.getElementById('loading-overlay');
             loader.style.opacity = '0';
@@ -342,17 +376,28 @@
                         const mainSrc = imageCache.get(icons.main) || icons.main;
                         const rankSrc = imageCache.get(icons.rank) || icons.rank;
                         const typeSrc = imageCache.get(icons.type) || icons.type;
+                        const extraSrc = imageCache.get(icons.extra) || icons.extra;
 
-                        card.innerHTML = `
-                            <div class="supply-assets">
-                                <div class="mini-icons-stack">
-                                    ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
-                                    ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                        if (icons.extra) {
+                            card.innerHTML = `
+                                <div class="supply-assets">
+                                    <img src="${extraSrc}" class="extra-icon">
                                 </div>
-                                ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
-                            </div>
-                            <div class="supply-content"><span>${item.title}</span></div>
-                        `;
+                                <div class="supply-content"><span>${item.title}</span></div>
+                            `;
+                        } else {
+                            card.innerHTML = `
+                                <div class="supply-assets">
+                                    <div class="mini-icons-stack">
+                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                    </div>
+                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
+                                </div>
+                                <div class="supply-content"><span>${item.title}</span></div>
+                            `;
+                        }
+                        
                         startCell.appendChild(card);
                     }
                 });
@@ -381,7 +426,7 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot error:', error);
-                alert("Не удалось создать скриншот. Попробуйте обновить страницу.");
+                alert("Не удалось создать скриншот. Попробуйте ещё раз.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
