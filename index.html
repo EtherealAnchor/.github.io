@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <style id="dynamic-fonts"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #FEF8F2;
@@ -167,7 +167,7 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s;
+            transition: opacity 0.3s;
         }
     </style>
 </head>
@@ -207,8 +207,7 @@
 
         const PROXIES = [
             "https://corsproxy.io/?",
-            "https://api.allorigins.win/raw?url=",
-            "https://thingproxy.freeboard.io/fetch/"
+            "https://api.allorigins.win/raw?url="
         ];
 
         const supplyData = {
@@ -245,26 +244,30 @@
 
         const imageCache = new Map();
 
-        async function fetchWithRetry(url, proxies = PROXIES, retries = 3) {
+        async function fetchWithRetry(url, proxies = PROXIES, retries = 2) {
+            if (!url.startsWith('http')) return url;
+
             for (let proxy of proxies) {
                 for (let i = 0; i < retries; i++) {
                     try {
-                        const targetUrl = url.startsWith('http') ? `${proxy}${encodeURIComponent(url)}` : url;
+                        const targetUrl = `${proxy}${encodeURIComponent(url)}`;
                         const response = await fetch(targetUrl, { cache: 'force-cache' });
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        if (!response.ok) throw new Error();
                         return await response.blob();
                     } catch (e) {
-                        if (i === retries - 1) break;
-                        await new Promise(r => setTimeout(r, 100 * (i + 1)));
+                        if (i === retries - 1) continue;
+                        await new Promise(r => setTimeout(r, 50));
                     }
                 }
             }
-            throw new Error(`Failed to load ${url}`);
+            throw new Error(`Load fail: ${url}`);
         }
 
         async function fetchImageAsDataURL(url) {
-            if (!url || !url.startsWith('http')) return url;
+            if (!url) return "";
+            if (!url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
+            
             try {
                 const blob = await fetchWithRetry(url);
                 const base64 = await new Promise((resolve) => {
@@ -275,25 +278,11 @@
                 imageCache.set(url, base64);
                 return base64;
             } catch (e) {
-                console.warn("Image load failed, using placeholder:", url);
                 return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             }
         }
 
-        // Фикс SecurityError для шрифтов Google Fonts
-        async function setupFonts() {
-            const fontUrl = "https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap";
-            try {
-                const blob = await fetchWithRetry(fontUrl);
-                const text = await blob.text();
-                document.getElementById('dynamic-fonts').textContent = text;
-            } catch (e) {
-                console.error("Font loading failed", e);
-            }
-        }
-
         async function preloadResources() {
-            await setupFonts();
             const urls = [];
             Object.values(supplyData).forEach(cat => {
                 cat.forEach(item => {
@@ -308,18 +297,22 @@
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
-            const chunkSize = 4;
+            const chunkSize = 10;
+            let loadedCount = 0;
+
             for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
                 const chunk = uniqueUrls.slice(i, i + chunkSize);
                 await Promise.all(chunk.map(async u => {
                     await fetchImageAsDataURL(u);
+                    loadedCount++;
                 }));
-                loadingText.innerText = `Загрузка: ${Math.round((Math.min(i + chunkSize, uniqueUrls.length) / uniqueUrls.length) * 100)}%`;
+                loadingText.innerText = `Загрузка: ${Math.round((loadedCount / uniqueUrls.length) * 100)}%`;
             }
             
-            const loader = document.getElementById('loading-overlay');
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 200);
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }, 300);
             
             renderBanners();
         }
@@ -383,7 +376,7 @@
                         if (icons.extra) {
                             card.innerHTML = `
                                 <div class="supply-assets">
-                                    <img src="${extraSrc}" class="extra-icon">
+                                    <img src="${extraSrc}" class="extra-icon" onerror="this.style.display='none'">
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -391,10 +384,10 @@
                             card.innerHTML = `
                                 <div class="supply-assets">
                                     <div class="mini-icons-stack">
-                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
-                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon" onerror="this.style.opacity='0'">` : '<div style="height:32px"></div>'}
+                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon" onerror="this.style.opacity='0'">` : '<div style="height:32px"></div>'}
                                     </div>
-                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; border-radius:4px"></div>'}
+                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon" onerror="this.style.opacity='0'">` : '<div style="width:74px; border-radius:4px"></div>'}
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -418,13 +411,9 @@
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    style: {
-                        transform: 'scale(1)',
-                    },
+                    fontEmbedCSS: true,
                     filter: (element) => {
-                        if (element.tagName === 'LINK' && element.rel === 'stylesheet') {
-                            return false;
-                        }
+                        if (element.tagName === 'LINK' && element.href.includes('tailwindcss')) return false;
                         return true;
                     }
                 });
@@ -435,11 +424,7 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot error:', error);
-                const imgs = node.querySelectorAll('img');
-                imgs.forEach(img => {
-                    if (!img.complete || img.naturalWidth === 0) console.warn('Broken img in capture:', img.src);
-                });
-                alert("Ошибка при создании скриншота. Попробуйте обновить страницу.");
+                alert("Ошибка при создании скриншота.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
