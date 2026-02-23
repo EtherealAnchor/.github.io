@@ -172,7 +172,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Инициализация кэша...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -200,8 +200,9 @@
 
         const PROXIES = [
             "https://api.allorigins.win/raw?url=",
+            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=", // Пример кастомного воркера, если есть
             "https://corsproxy.io/?",
-            "https://thingproxy.freeboard.io/fetch/"
+            "https://api.codetabs.com/v1/proxy?quest="
         ];
 
         const supplyData = {
@@ -227,22 +228,20 @@
 
         const imageCache = new Map();
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-        const DB_NAME = "ImageCacheDB";
+        const DB_NAME = "ImageCacheDB_v2";
         const STORE_NAME = "images";
 
         function openDB() {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const request = indexedDB.open(DB_NAME, 1);
-                request.onupgradeneeded = (e) => {
-                    e.target.result.createObjectStore(STORE_NAME);
-                };
+                request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
                 request.onsuccess = (e) => resolve(e.target.result);
-                request.onerror = (e) => reject(e.target.error);
+                request.onerror = () => resolve(null);
             });
         }
 
         async function getFromDB(db, url) {
+            if (!db) return null;
             return new Promise((resolve) => {
                 const transaction = db.transaction(STORE_NAME, "readonly");
                 const store = transaction.objectStore(STORE_NAME);
@@ -253,29 +252,44 @@
         }
 
         async function saveToDB(db, url, data) {
+            if (!db || !data || data === EMPTY_IMG) return;
             const transaction = db.transaction(STORE_NAME, "readwrite");
             transaction.objectStore(STORE_NAME).put(data, url);
         }
 
         async function fetchWithRetry(url) {
-            const cleanUrl = url.split('?')[0];
+            let absoluteUrl = url;
+            if (!url.startsWith('http')) {
+                absoluteUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/') + url;
+            }
+
             for (const proxy of PROXIES) {
                 try {
-                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 1000);
+                    
+                    const response = await fetch(`${proxy}${encodeURIComponent(absoluteUrl)}`, { signal: controller.signal });
+                    clearTimeout(timeout);
+                    
                     if (!response.ok) continue;
+                    
                     const blob = await response.blob();
+                    if (blob.size < 100) continue;
+
                     return await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(blob);
                     });
-                } catch (e) {}
+                } catch (e) {
+                    console.warn(`Proxy failed: ${proxy}`, e);
+                }
             }
             return null;
         }
 
         async function fetchImage(db, url) {
-            if (imageCache.has(url)) return imageCache.get(url);
+            if (imageCache.has(url) && imageCache.get(url) !== EMPTY_IMG) return imageCache.get(url);
 
             const cached = await getFromDB(db, url);
             if (cached && cached !== EMPTY_IMG) {
@@ -285,11 +299,12 @@
 
             const fetched = await fetchWithRetry(url);
             if (fetched) {
-                await saveToDB(db, url, fetched);
                 imageCache.set(url, fetched);
+                await saveToDB(db, url, fetched);
                 return fetched;
             }
 
+            imageCache.set(url, EMPTY_IMG);
             return EMPTY_IMG;
         }
 
@@ -303,8 +318,9 @@
             const loadingText = document.getElementById('loading-text');
             
             for (let i = 0; i < uniqueUrls.length; i++) {
-                loadingText.innerText = `Синхронизация кэша: ${i+1}/${uniqueUrls.length}`;
+                loadingText.innerText = `Загрузка: ${i+1}/${uniqueUrls.length}`;
                 await fetchImage(db, uniqueUrls[i]);
+                if (i % 2 === 0) renderBanners();
             }
 
             document.getElementById('loading-overlay').style.opacity = '0';
@@ -351,7 +367,7 @@
                         
                         let assetsHtml = '';
                         if (item.icons.extra) {
-                            assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon">`;
+                            assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
                         } else {
                             const rank = getSrc('rank');
                             const type = getSrc('type');
@@ -359,12 +375,12 @@
 
                             const miniStack = (rank || type) ? `
                                 <div class="mini-icons-stack">
-                                    ${rank ? `<img src="${rank}" class="mini-icon">` : ''}
-                                    ${type ? `<img src="${type}" class="mini-icon">` : ''}
+                                    ${rank ? `<img src="${rank}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
+                                    ${type ? `<img src="${type}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
                                 </div>
                             ` : '';
 
-                            assetsHtml = `${miniStack}${main ? `<img src="${main}" class="main-icon">` : ''}`;
+                            assetsHtml = `${miniStack}${main ? `<img src="${main}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
                         }
 
                         card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
@@ -378,35 +394,39 @@
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
             const originalText = btn.innerText;
-            btn.innerText = "⌛ Сохранение...";
+            btn.innerText = "⌛ Обработка...";
             btn.disabled = true;
 
             try {
                 const db = await openDB();
+                let retryHappened = false;
                 for (const [url, data] of imageCache) {
                     if (data === EMPTY_IMG) {
                         const fetched = await fetchWithRetry(url);
                         if (fetched) {
                             imageCache.set(url, fetched);
                             await saveToDB(db, url, fetched);
+                            retryHappened = true;
                         }
                     }
                 }
-                renderBanners();
+                if (retryHappened) renderBanners();
+
+                await new Promise(r => setTimeout(r, 500));
 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: ""
+                    cacheBust: true
                 });
                 
                 const link = document.createElement('a');
-                link.download = `HI3_Schedule_${Date.now()}.png`;
+                link.download = `HI3_Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
                 console.error(e);
-                alert("Ошибка при создании скриншота.");
+                alert("Ошибка создания скриншота. Попробуйте обновить страницу.");
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
