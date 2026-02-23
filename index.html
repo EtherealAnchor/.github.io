@@ -138,7 +138,7 @@
 
         .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 4px; }
         .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
-        .extra-icon { width: 140px; height: 74px; object-fit: cover; border-radius: 6px; }
+        .extra-icon { width: 180px; height: 74px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -236,8 +236,8 @@
                 { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
 
-            "Карнавал А": [{ title: '<span class="text-md">Ротация: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
             "Наряд": [
                 { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png" } },
                 { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
@@ -392,7 +392,7 @@
                                         ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
                                         ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
                                     </div>
-                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; background:#73486F; border-radius:4px"></div>'}
+                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; border-radius:4px"></div>'}
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
