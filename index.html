@@ -143,22 +143,19 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-align: center;
             color: #2d0a2a;
             flex: 1;
-            line-height: 1.1;
+            line-height: 1.2;
             padding: 0 10px 0 4px;
             overflow: hidden;
+            text-align: center;
         }
         
-        .supply-content span {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .text-xl { font-size: 1.1rem; font-weight: 900; }
+        .text-lg { font-size: 0.9rem; font-weight: 800; }
+        .text-md { font-size: 0.75rem; font-weight: 700; }
+        .text-sm { font-size: 0.65rem; font-weight: 600; }
+        .text-xs { font-size: 0.55rem; font-weight: 500; opacity: 0.8; }
 
         #loading-overlay {
             position: fixed;
@@ -210,23 +207,34 @@
         const PROXY_URL = "https://corsproxy.io/?";
 
         const supplyData = {
-            "Боевой костюм А": [{ title: "Усмиряющий клинок возвещает о рассвете</br>50% скидка на первые 10 круток", startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } }],
-            "Боевой костюм Б": [{ title: "Привет♪ Фея желаний любви♥️", startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
-            "Экипировка А": [{ title: "Экипировка новой Мэй", startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
+            "Боевой костюм А": [
+                { 
+                    title: '<span class="text-lg">Клинок усмирения: Рассвет</span><br><span class="text-xs">50% скидка на первые 10 круток</span>', 
+                    startWeek: 1, 
+                    duration: 6, 
+                    icons: { 
+                        main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", 
+                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", 
+                        type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" 
+                    } 
+                }
+            ],
+            "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
+            "Экипировка А": [{ title: '<span class="text-md">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
-                { title: "Экипировка Феи Элизии", startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
-                { title: "Новая экипировка Луны", startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
+                { title: '<span class="text-md">Экипировка для Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
+                { title: '<span class="text-md">Новая экипировка Луны</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
             ],
             "Оператор": [
-                { title: "Ченьсюэ", startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
-                { title: "Тереза", startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
-                { title: "Серафим", startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
+                { title: '<span class="text-md">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
+                { title: '<span class="text-md">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
+                { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-            "Карнавал А": [{ title: "Ротация: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }],
-            "Карнавал Б": [{ title: "Ротация экипировки: Корали, Хелия, Киана, Вита", startWeek: 2, duration: 3, icons: {} }],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: {} }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: {} }],
             "Наряд": [
-                { title: "Наряд Изящная Луна", startWeek: 2, duration: 3, icons: { main: "images/cnELy.png" } },
-                { title: "Молитвы зимы, новые мечтания", startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
+                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "images/cnELy.png" } },
+                { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
 
