@@ -180,8 +180,8 @@
 
     <nav class="nav-container">
         <button id="nav-schedule" class="nav-button active">Расписание</button>
-        <a href="enemies.html" class="nav-button">Боссы</a>
-        <a href="er.html" class="nav-button">Царство Элизиума</a>
+        <a href="#" class="nav-button">Боссы</a>
+        <a href="#" class="nav-button">Царство Элизиума</a>
         <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">Создать скриншот</button>
     </nav>
 
@@ -234,10 +234,10 @@
                 { title: '<span class="text-md">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
                 { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/rot.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/weaprot.png" } }],
             "Наряд": [
-                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "images/cnEly.png" } },
+                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
                 { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
@@ -246,23 +246,24 @@
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         async function fetchWithRetry(url, proxies = PROXIES, retries = 2) {
-            if (!url.startsWith('http')) return url;
+            if (!url || !url.startsWith('http')) return null;
 
             for (let proxy of proxies) {
                 for (let i = 0; i < retries; i++) {
                     try {
                         const targetUrl = `${proxy}${encodeURIComponent(url)}`;
-                        // Добавлено no-cache для избежания битых закэшированных данных
-                        const response = await fetch(targetUrl, { cache: 'no-cache' });
+                        const response = await fetch(targetUrl, { cache: 'force-cache' });
                         if (!response.ok) throw new Error();
-                        return await response.blob();
+                        const blob = await response.blob();
+                        if (blob.size < 100) throw new Error("Empty blob");
+                        return blob;
                     } catch (e) {
                         if (i === retries - 1) continue;
-                        await new Promise(r => setTimeout(r, 100));
+                        await new Promise(r => setTimeout(r, 150));
                     }
                 }
             }
-            throw new Error(`Load fail: ${url}`);
+            return null;
         }
 
         async function fetchImageAsDataURL(url) {
@@ -272,6 +273,8 @@
             
             try {
                 const blob = await fetchWithRetry(url);
+                if (!blob) return EMPTY_IMG;
+
                 const base64 = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
@@ -281,7 +284,6 @@
                 imageCache.set(url, base64);
                 return base64;
             } catch (e) {
-                console.warn("Failed to cache:", url);
                 return EMPTY_IMG;
             }
         }
@@ -300,10 +302,9 @@
 
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
-            
-            const chunkSize = 8;
             let loadedCount = 0;
 
+            const chunkSize = 4;
             for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
                 const chunk = uniqueUrls.slice(i, i + chunkSize);
                 await Promise.all(chunk.map(async u => {
@@ -316,9 +317,8 @@
             document.getElementById('loading-overlay').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
+                renderBanners();
             }, 300);
-            
-            renderBanners();
         }
 
         function initTable() {
@@ -380,7 +380,7 @@
                         if (icons.extra) {
                             card.innerHTML = `
                                 <div class="supply-assets">
-                                    <img src="${extraSrc}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">
+                                    <img src="${extraSrc}" class="extra-icon">
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -388,10 +388,10 @@
                             card.innerHTML = `
                                 <div class="supply-assets">
                                     <div class="mini-icons-stack">
-                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="height:32px"></div>'}
-                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="height:32px"></div>'}
+                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
+                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon">` : '<div style="height:32px"></div>'}
                                     </div>
-                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="width:74px; border-radius:4px"></div>'}
+                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon">` : '<div style="width:74px; border-radius:4px"></div>'}
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -414,22 +414,13 @@
             try {
                 renderBanners();
                 
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 300));
 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: true,
-                    cacheBust: true,
+                    cacheBust: false,
                     imagePlaceholder: EMPTY_IMG,
-                    style: {
-                        transform: 'scale(1)',
-                        transformOrigin: 'top left'
-                    },
-                    filter: (element) => {
-                        if (element.tagName === 'LINK' && element.href.includes('tailwindcss')) return false;
-                        return true;
-                    }
                 });
                 
                 const link = document.createElement('a');
@@ -438,7 +429,7 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot error:', error);
-                alert("Ошибка при создании скриншота. Попробуйте ещё раз через секунду.");
+                alert("Ошибка скриншота. Убедитесь, что все ресурсы загружены.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
