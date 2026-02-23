@@ -12,7 +12,7 @@
     <style>
         body {
             background-color: #FEF8F2;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             color: white;
             margin: 0;
             padding: 0;
@@ -172,7 +172,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Инициализация ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка данных...</p>
     </div>
 
     <nav class="nav-container">
@@ -229,49 +229,38 @@
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
 
-            const blobToDataURL = (blob) => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+            const cleanUrl = url.split('?')[0];
+
             for (const proxy of PROXIES) {
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000);
-                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    
+                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
                     if (!response.ok) continue;
                     const blob = await response.blob();
-                    if (blob.size < 100) continue; 
-
-                    const data = await blobToDataURL(blob);
-                    imageCache.set(url, data);
-                    return data;
+                    return await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            imageCache.set(url, reader.result);
+                            resolve(reader.result);
+                        };
+                        reader.readAsDataURL(blob);
+                    });
                 } catch (e) { continue; }
             }
 
-            try {
-                return await new Promise((resolve) => {
-                    const img = new Image();
-                    img.crossOrigin = "Anonymous";
-                    img.onload = () => {
-                        const canvas = document.createElement("canvas");
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext("2d");
-                        ctx.drawImage(img, 0, 0);
-                        const dataURL = canvas.toDataURL("image/png");
-                        imageCache.set(url, dataURL);
-                        resolve(dataURL);
-                    };
-                    img.onerror = () => resolve(EMPTY_IMG);
-                    img.src = url + (url.includes('?') ? '&' : '?') + 'cache=' + Math.random();
-                });
-            } catch (e) {
-                return EMPTY_IMG;
-            }
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext("2d").drawImage(img, 0, 0);
+                    const res = canvas.toDataURL("image/png");
+                    imageCache.set(url, res);
+                    resolve(res);
+                };
+                img.onerror = () => resolve(EMPTY_IMG);
+                img.src = url;
+            });
         }
 
         async function preloadAll() {
@@ -287,11 +276,9 @@
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
-            const batchSize = 3;
-            for (let i = 0; i < uniqueUrls.length; i += batchSize) {
-                const batch = uniqueUrls.slice(i, i + batchSize);
-                loadingText.innerText = `Загрузка ресурсов: ${Math.min(i + batchSize, uniqueUrls.length)} / ${uniqueUrls.length}`;
-                await Promise.all(batch.map(u => convertToDataURL(u)));
+            for (let i = 0; i < uniqueUrls.length; i++) {
+                loadingText.innerText = `Подготовка графики: ${i + 1} / ${uniqueUrls.length}`;
+                await convertToDataURL(uniqueUrls[i]);
             }
 
             document.getElementById('loading-overlay').style.opacity = '0';
@@ -304,21 +291,18 @@
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
-            
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
                 th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
                 headerRow.appendChild(th);
             }
-            
             categories.forEach(cat => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td class="category-cell">${cat}</td>` + 
                     Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
                 tbody.appendChild(tr);
             });
-            
             preloadAll();
         }
 
@@ -348,7 +332,6 @@
                             const type = getSrc('type');
                             const main = getSrc('main');
 
-                            // Генерируем стопку иконок только если они есть
                             const miniStack = (rank || type) ? `
                                 <div class="mini-icons-stack">
                                     ${rank ? `<img src="${rank}" class="mini-icon">` : ''}
@@ -356,16 +339,10 @@
                                 </div>
                             ` : '';
 
-                            assetsHtml = `
-                                ${miniStack}
-                                ${main ? `<img src="${main}" class="main-icon">` : ''}
-                            `;
+                            assetsHtml = `${miniStack}${main ? `<img src="${main}" class="main-icon">` : ''}`;
                         }
 
-                        card.innerHTML = `
-                            <div class="supply-assets">${assetsHtml}</div>
-                            <div class="supply-content"><span>${item.title}</span></div>
-                        `;
+                        card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content"><span>${item.title}</span></div>`;
                         startCell.appendChild(card);
                     }
                 });
@@ -379,18 +356,19 @@
             btn.disabled = true;
 
             try {
-                await window.htmlToImage.toPng(node); 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
-                    backgroundColor: '#FEF8F2'
+                    backgroundColor: '#FEF8F2',
+                    skipFonts: true 
                 });
                 
                 const link = document.createElement('a');
-                link.download = `HI3_Schedule_${Date.now()}.png`;
+                link.download = `Schedule_${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                alert("Ошибка сохранения. Попробуйте еще раз.");
+                console.error("Screenshot error:", e);
+                alert("Ошибка скриншота. Проблема с доступом к стилям шрифтов.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
