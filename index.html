@@ -62,16 +62,20 @@
             background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
-            padding: 24px;
+            padding: 20px;
         }
 
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 8px;
+            border-collapse: collapse;
             table-layout: fixed;
             background: transparent;
             min-width: 1200px;
+        }
+
+        th, td {
+            border: 3px solid transparent; 
+            background-clip: padding-box !important;
         }
 
         .week-cell {
@@ -79,7 +83,7 @@
             padding: 12px 5px;
             text-align: center;
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
         .week-name { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; display: block; }
@@ -87,10 +91,10 @@
 
         .category-cell {
             background: rgba(0, 0, 0, 0.4);
-            padding: 15px;
+            padding: 12px;
             font-weight: 700;
-            font-size: 1rem;
-            border-radius: 10px;
+            font-size: 0.95rem;
+            border-radius: 16px;
             white-space: nowrap;
             width: 180px;
             backdrop-filter: blur(4px);
@@ -98,11 +102,11 @@
         }
 
         .category-cell-alt {
-            background: rgba(195, 112, 127, 0.4);
-            padding: 15px;
+            background: rgba(195, 112, 127, 0.6);
+            padding: 12px;
             font-weight: 700;
-            font-size: 1rem;
-            border-radius: 10px;
+            font-size: 0.95rem;
+            border-radius: 16px;
             white-space: nowrap;
             width: 180px;
             backdrop-filter: blur(4px);
@@ -112,21 +116,20 @@
 
         .content-cell {
             position: relative;
-            height: 100px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
+            height: 90px;
+            border-radius: 8px;
         }
 
         .supply-card {
             background: #F5E9F4;
-            height: 85px;
+            height: 80px;
             display: flex;
             align-items: center;
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             z-index: 10;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
         }
 
@@ -135,20 +138,20 @@
             align-items: center;
             gap: 2px;
             height: 100%;
-            padding: 6px;
+            padding: 4px;
             flex-shrink: 0;
         }
 
         .mini-icons-stack {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
             justify-content: center;
         }
 
-        .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 4px; }
-        .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
-        .extra-icon { width: 180px; height: 74px; object-fit: cover; border-radius: 6px; }
+        .mini-icon { width: 30px; height: 30px; object-fit: contain; background: #73486F; border-radius: 4px; }
+        .main-icon { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; }
+        .extra-icon { width: 170px; height: 70px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -156,8 +159,8 @@
             justify-content: center;
             color: #2d0a2a;
             flex: 1;
-            line-height: 1.2;
-            padding: 0 10px 0 4px;
+            line-height: 1.1;
+            padding: 0 8px 0 4px;
             overflow: hidden;
             text-align: center;
         }
@@ -174,10 +177,10 @@
             transition: opacity 0.5s;
         }
 
-        .text-lg { font-size: 0.95rem; font-weight: 900; }
-        .text-md { font-size: 0.9rem; font-weight: 800; }
-        .text-ex { font-size: 0.95rem; font-weight: 800; }
-        .text-xs { font-size: 0.75rem; font-style: italic; font-weight: 800;  }
+        .text-lg { font-size: 0.9rem; font-weight: 900; }
+        .text-md { font-size: 0.85rem; font-weight: 800; }
+        .text-ex { font-size: 0.9rem; font-weight: 800; }
+        .text-xs { font-size: 0.7rem; font-style: italic; font-weight: 800;  }
     </style>
 </head>
 <body>
@@ -198,7 +201,7 @@
         <div class="capture-wrapper" id="capture-area">
             <table id="supplyTable">
                 <thead>
-                    <tr id="weeksHeader"><th style="width: 180px;"></th></tr>
+                    <tr id="weeksHeader"><th style="width: 180px; background: transparent !important; border: 3px solid transparent;"></th></tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -279,43 +282,34 @@
                 try {
                     const controller = new AbortController();
                     const timeout = setTimeout(() => controller.abort(), 1000);
-                    
                     const response = await fetch(`${proxy}${encodeURIComponent(absoluteUrl)}`, { signal: controller.signal });
                     clearTimeout(timeout);
-                    
                     if (!response.ok) continue;
-                    
                     const blob = await response.blob();
                     if (blob.size < 100) continue;
-
                     return await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(blob);
                     });
-                } catch (e) {
-                    console.warn(`Proxy failed: ${proxy}`, e);
-                }
+                } catch (e) { console.warn(`Proxy failed: ${proxy}`, e); }
             }
             return null;
         }
 
         async function fetchImage(db, url) {
             if (imageCache.has(url) && imageCache.get(url) !== EMPTY_IMG) return imageCache.get(url);
-
             const cached = await getFromDB(db, url);
             if (cached && cached !== EMPTY_IMG) {
                 imageCache.set(url, cached);
                 return cached;
             }
-
             const fetched = await fetchWithRetry(url);
             if (fetched) {
                 imageCache.set(url, fetched);
                 await saveToDB(db, url, fetched);
                 return fetched;
             }
-
             imageCache.set(url, EMPTY_IMG);
             return EMPTY_IMG;
         }
@@ -328,13 +322,11 @@
             }));
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
-            
             for (let i = 0; i < uniqueUrls.length; i++) {
                 loadingText.innerText = `Загрузка: ${i+1}/${uniqueUrls.length}`;
                 await fetchImage(db, uniqueUrls[i]);
                 if (i % 2 === 0) renderBanners();
             }
-
             document.getElementById('loading-overlay').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
@@ -345,18 +337,15 @@
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
-            
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
                 th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
                 headerRow.appendChild(th);
             }
-            
             categories.forEach((cat, index) => {
                 const tr = document.createElement('tr');
                 const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
-                
                 tr.innerHTML = `<td class="${cellClass}">${cat}</td>` + 
                     Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
                 tbody.appendChild(tr);
@@ -372,15 +361,14 @@
                     const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
                     const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
                     const endCell = document.getElementById(`cell-${cat}-${endWeekNum}`);
-                    
                     if (startCell && endCell) {
                         const card = document.createElement('div');
                         card.className = 'supply-card';
-                        card.style.width = `${(endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 8}px`;
-                        card.style.left = `4px`;
-
+                        const internalPadding = 2; // Уменьшен отступ внутри ячейки
+                        const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - (internalPadding * 2);
+                        card.style.width = `${width}px`;
+                        card.style.left = `${internalPadding}px`;
                         const getSrc = (k) => item.icons[k] ? (imageCache.get(item.icons[k]) || EMPTY_IMG) : null;
-                        
                         let assetsHtml = '';
                         if (item.icons.extra) {
                             assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
@@ -388,17 +376,14 @@
                             const rank = getSrc('rank');
                             const type = getSrc('type');
                             const main = getSrc('main');
-
                             const miniStack = (rank || type) ? `
                                 <div class="mini-icons-stack">
                                     ${rank ? `<img src="${rank}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
                                     ${type ? `<img src="${type}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
                                 </div>
                             ` : '';
-
                             assetsHtml = `${miniStack}${main ? `<img src="${main}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
                         }
-
                         card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
                         startCell.appendChild(card);
                     }
@@ -412,37 +397,31 @@
             const originalText = btn.innerText;
             btn.innerText = "⌛ Обработка...";
             btn.disabled = true;
-
             try {
                 const db = await openDB();
-                let retryHappened = false;
                 for (const [url, data] of imageCache) {
                     if (data === EMPTY_IMG) {
                         const fetched = await fetchWithRetry(url);
                         if (fetched) {
                             imageCache.set(url, fetched);
                             await saveToDB(db, url, fetched);
-                            retryHappened = true;
                         }
                     }
                 }
-                if (retryHappened) renderBanners();
-
+                renderBanners();
                 await new Promise(r => setTimeout(r, 500));
-
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
                     cacheBust: true
                 });
-                
                 const link = document.createElement('a');
                 link.download = `HI3_Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
                 console.error(e);
-                alert("Ошибка создания скриншота. Попробуйте обновить страницу.");
+                alert("Ошибка создания скриншота.");
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
