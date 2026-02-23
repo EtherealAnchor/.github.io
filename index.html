@@ -46,7 +46,6 @@
         .nav-button.active {
             background: #9d1c8c;
             border-color: pink;
-            box-shadow: 0 0 15px rgba(157, 28, 140, 0.5);
         }
 
         .screenshot-button { background: #27ae60; color: white; border-color: #2ecc71; }
@@ -60,11 +59,10 @@
         }
 
         .capture-wrapper {
-            background: linear-gradient(to right, #800080, #ffc0cb);
+            background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
-            padding: 24px; 
-            border-radius: 16px;
+            padding: 24px;
         }
 
         table {
@@ -77,7 +75,7 @@
         }
 
         .week-cell {
-            background: #400d3c;
+            background: rgba(0, 0, 0, 0.4);
             padding: 12px 5px;
             text-align: center;
             color: white;
@@ -91,23 +89,36 @@
             background: rgba(0, 0, 0, 0.4);
             padding: 15px;
             font-weight: 700;
-            font-size: 0.9rem;
-            border-radius: 8px;
+            font-size: 1rem;
+            border-radius: 10px;
             white-space: nowrap;
             width: 180px;
             backdrop-filter: blur(4px);
+            text-align: center;
+        }
+
+        .category-cell-alt {
+            background: rgba(195, 112, 127, 0.4);
+            padding: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 10px;
+            white-space: nowrap;
+            width: 180px;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            color: #fff;
         }
 
         .content-cell {
             position: relative;
             height: 100px;
-            border-radius: 8px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
         }
 
         .supply-card {
             background: #F5E9F4;
-            border: 2px solid rgba(0, 0, 0);
             height: 85px;
             display: flex;
             align-items: center;
@@ -165,8 +176,8 @@
 
         .text-lg { font-size: 0.95rem; font-weight: 900; }
         .text-md { font-size: 0.9rem; font-weight: 800; }
-        .text-ex { font-size: 0.95rem; }
-        .text-xs { font-size: 0.75rem; font-style: italic; }
+        .text-ex { font-size: 0.95rem; font-weight: 800; }
+        .text-xs { font-size: 0.75rem; font-style: italic; font-weight: 800;  }
     </style>
 </head>
 <body>
@@ -334,15 +345,19 @@
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
+            
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
                 th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
                 headerRow.appendChild(th);
             }
-            categories.forEach(cat => {
+            
+            categories.forEach((cat, index) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="category-cell">${cat}</td>` + 
+                const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
+                
+                tr.innerHTML = `<td class="${cellClass}">${cat}</td>` + 
                     Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
                 tbody.appendChild(tr);
             });
