@@ -243,6 +243,7 @@
         };
 
         const imageCache = new Map();
+        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         async function fetchWithRetry(url, proxies = PROXIES, retries = 2) {
             if (!url.startsWith('http')) return url;
@@ -251,12 +252,13 @@
                 for (let i = 0; i < retries; i++) {
                     try {
                         const targetUrl = `${proxy}${encodeURIComponent(url)}`;
-                        const response = await fetch(targetUrl, { cache: 'force-cache' });
+                        // Добавлено no-cache для избежания битых закэшированных данных
+                        const response = await fetch(targetUrl, { cache: 'no-cache' });
                         if (!response.ok) throw new Error();
                         return await response.blob();
                     } catch (e) {
                         if (i === retries - 1) continue;
-                        await new Promise(r => setTimeout(r, 50));
+                        await new Promise(r => setTimeout(r, 100));
                     }
                 }
             }
@@ -264,21 +266,23 @@
         }
 
         async function fetchImageAsDataURL(url) {
-            if (!url) return "";
-            if (!url.startsWith('http')) return url;
+            if (!url) return EMPTY_IMG;
+            if (!url.startsWith('http')) return url; 
             if (imageCache.has(url)) return imageCache.get(url);
             
             try {
                 const blob = await fetchWithRetry(url);
-                const base64 = await new Promise((resolve) => {
+                const base64 = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
                     reader.readAsDataURL(blob);
                 });
                 imageCache.set(url, base64);
                 return base64;
             } catch (e) {
-                return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                console.warn("Failed to cache:", url);
+                return EMPTY_IMG;
             }
         }
 
@@ -297,7 +301,7 @@
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
-            const chunkSize = 10;
+            const chunkSize = 8;
             let loadedCount = 0;
 
             for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
@@ -305,8 +309,8 @@
                 await Promise.all(chunk.map(async u => {
                     await fetchImageAsDataURL(u);
                     loadedCount++;
+                    loadingText.innerText = `Загрузка: ${Math.round((loadedCount / uniqueUrls.length) * 100)}%`;
                 }));
-                loadingText.innerText = `Загрузка: ${Math.round((loadedCount / uniqueUrls.length) * 100)}%`;
             }
             
             document.getElementById('loading-overlay').style.opacity = '0';
@@ -368,15 +372,15 @@
                         card.style.left = `${visualPadding}px`;
                         
                         const icons = item.icons || {};
-                        const mainSrc = imageCache.get(icons.main) || icons.main;
-                        const rankSrc = imageCache.get(icons.rank) || icons.rank;
-                        const typeSrc = imageCache.get(icons.type) || icons.type;
-                        const extraSrc = imageCache.get(icons.extra) || icons.extra;
+                        const mainSrc = imageCache.get(icons.main) || icons.main || EMPTY_IMG;
+                        const rankSrc = imageCache.get(icons.rank) || icons.rank || EMPTY_IMG;
+                        const typeSrc = imageCache.get(icons.type) || icons.type || EMPTY_IMG;
+                        const extraSrc = imageCache.get(icons.extra) || icons.extra || EMPTY_IMG;
 
                         if (icons.extra) {
                             card.innerHTML = `
                                 <div class="supply-assets">
-                                    <img src="${extraSrc}" class="extra-icon" onerror="this.style.display='none'">
+                                    <img src="${extraSrc}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -384,10 +388,10 @@
                             card.innerHTML = `
                                 <div class="supply-assets">
                                     <div class="mini-icons-stack">
-                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon" onerror="this.style.opacity='0'">` : '<div style="height:32px"></div>'}
-                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon" onerror="this.style.opacity='0'">` : '<div style="height:32px"></div>'}
+                                        ${icons.rank ? `<img src="${rankSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="height:32px"></div>'}
+                                        ${icons.type ? `<img src="${typeSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="height:32px"></div>'}
                                     </div>
-                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon" onerror="this.style.opacity='0'">` : '<div style="width:74px; border-radius:4px"></div>'}
+                                    ${icons.main ? `<img src="${mainSrc}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : '<div style="width:74px; border-radius:4px"></div>'}
                                 </div>
                                 <div class="supply-content"><span>${item.title}</span></div>
                             `;
@@ -408,10 +412,20 @@
             btn.disabled = true;
 
             try {
+                renderBanners();
+                
+                await new Promise(r => setTimeout(r, 100));
+
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
                     fontEmbedCSS: true,
+                    cacheBust: true,
+                    imagePlaceholder: EMPTY_IMG,
+                    style: {
+                        transform: 'scale(1)',
+                        transformOrigin: 'top left'
+                    },
                     filter: (element) => {
                         if (element.tagName === 'LINK' && element.href.includes('tailwindcss')) return false;
                         return true;
@@ -424,7 +438,7 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot error:', error);
-                alert("Ошибка при создании скриншота.");
+                alert("Ошибка при создании скриншота. Попробуйте ещё раз через секунду.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
