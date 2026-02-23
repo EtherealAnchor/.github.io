@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enemies Schedule - Persistent</title>
+    <title>Боссы</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -93,6 +93,10 @@
 
         .boss-cell:hover {
             border-color: var(--accent-orange);
+        }
+
+        .boss-cell:not([style*="background-image"]) .type-badge {
+            display: none;
         }
 
         .boss-svg-container {
@@ -305,7 +309,7 @@
      <script>
         const ABYSS_LIBRARY = [
             { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/15/"Lantern"_%28Enemy%29_%28Icon%29.png' },
-            { name: "Flux", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4b/"Lantern"_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
+            { name: "Флюс", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4b/"Lantern"_%28Enemy%29_%28SSS%29_%28Icon%29.png' },
             { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/6d/"Perception"_%28Enemy%29_%28Icon%29.png' },
             { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/44/Abyssal_Shadow_%28Enemy%29_%28Icon%29.png' },
             { name: "", image: 'https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ed/Aesir_Baldr_%28Enemy%29_%28Icon%29.png' },
@@ -357,7 +361,7 @@
             { name: "Огненный", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/1b/Tonatiuh_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
             { name: "Эхо", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/81/Vita_-_Sea%27s_Depths_%28Enemy%29_%28SSS%29_%28Icon%29.png" },
             { name: "Физический", image: "images/Nian.png" },
-            { name: "Counter", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/14/Dark_Jixuanyuan_%28Enemy%29_%28Icon%29.png" }
+            { name: "Противотипный", image: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/1/14/Dark_Jixuanyuan_%28Enemy%29_%28Icon%29.png" }
         ];
 
         const MA_LIBRARY = [
@@ -450,7 +454,11 @@
                 const cells = row.querySelectorAll('.boss-cell');
                 
                 week.cells.forEach((cellData, i) => {
-                    if (cellData.bg) cells[i].style.backgroundImage = cellData.bg;
+                    if (cellData.bg && cellData.bg !== 'none' && cellData.bg !== '') {
+                        cells[i].style.backgroundImage = cellData.bg;
+                    } else {
+                        cells[i].style.backgroundImage = '';
+                    }
                     cells[i].querySelector('.boss-svg-text').textContent = cellData.text;
                 });
                 tbody.appendChild(row);
