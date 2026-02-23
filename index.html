@@ -258,7 +258,7 @@
                         return await response.blob();
                     } catch (e) {
                         if (i === retries - 1) break;
-                        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                        await new Promise(r => setTimeout(r, 100 * (i + 1)));
                     }
                 }
             }
