@@ -107,7 +107,7 @@
 
         .supply-card {
             background: #F5E9F4;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(0, 0, 0);
             height: 85px;
             display: flex;
             align-items: center;
@@ -122,7 +122,7 @@
         .supply-assets {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             height: 100%;
             padding: 6px;
             flex-shrink: 0;
@@ -164,8 +164,9 @@
         }
 
         .text-lg { font-size: 0.95rem; font-weight: 900; }
-        .text-md { font-size: 0.9rem; font-weight: 700; }
-        .text-xs { font-size: 0.75rem; }
+        .text-md { font-size: 0.9rem; font-weight: 800; }
+        .text-ex { font-size: 0.95rem; }
+        .text-xs { font-size: 0.75rem; font-style: italic; }
     </style>
 </head>
 <body>
@@ -200,7 +201,7 @@
 
         const PROXIES = [
             "https://api.allorigins.win/raw?url=",
-            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=", // Пример кастомного воркера, если есть
+            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
             "https://corsproxy.io/?",
             "https://api.codetabs.com/v1/proxy?quest="
         ];
@@ -221,8 +222,8 @@
             "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюм Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
             "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
             "Наряд": [
-                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
-                { title: '<span class="text-md">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
+                { title: '<span class="text-ex">Изящная Луна</span><span class="text-xs">9600 кристаллов</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
+                { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
 
