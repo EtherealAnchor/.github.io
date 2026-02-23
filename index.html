@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расписание</title>
+    <title>Расписание событий</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,7 @@
     <style>
         body {
             background-color: #FEF8F2;
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             color: white;
             margin: 0;
             padding: 0;
@@ -172,30 +172,26 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка данных...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
     </div>
 
     <nav class="nav-container">
-        <button id="nav-schedule" class="nav-button active">Расписание</button>
+        <button class="nav-button active">Расписание</button>
         <button class="nav-button">Боссы</button>
-        <button class="nav-button">Царство Элизиума</button>
+        <button class="nav-button">Элизиум</button>
         <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">Создать скриншот</button>
     </nav>
 
-    <section id="schedule-page" class="page-section active">
-        <main class="table-container">
-            <div class="capture-wrapper" id="capture-area">
-                <table id="supplyTable">
-                    <thead>
-                        <tr id="weeksHeader">
-                            <th style="width: 180px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-        </main>
-    </section>
+    <div class="table-container">
+        <div class="capture-wrapper" id="capture-area">
+            <table id="supplyTable">
+                <thead>
+                    <tr id="weeksHeader"><th style="width: 180px;"></th></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
         const totalWeeks = 8;
@@ -203,60 +199,89 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const PROXIES = [
-            "https://corsproxy.io/?",
             "https://api.allorigins.win/raw?url=",
-            "https://thingproxy.freeboard.io/fetch/"
+            "https://cors-anywhere.herokuapp.com/",
+            "https://proxy.cors.sh/",
+            "https://corsproxy.io/?"
         ];
 
         const supplyData = {
-            "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><br><span class="text-xs">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" } }],
+            "Боевой костюм А": [
+                { 
+                    title: '<span class="text-lg">Клинок усмирения: Рассвет</span><br><span class="text-xs">50% скидка на первые 10 круток</span>', 
+                    startWeek: 1, 
+                    duration: 6, 
+                    icons: { 
+                        main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", 
+                        rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", 
+                        type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/64/Physical_DMG_%28Icon%29.png" 
+                    } 
+                }
+            ],
             "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/74/Ice_DMG_%28Icon%29.png" } }],
             "Экипировка А": [{ title: '<span class="text-md">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
-                { title: '<span class="text-md">Экипировка для Феи желаний</span>', startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
+                { title: '<span class="text-md">Экипировка для Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
                 { title: '<span class="text-md">Новая экипировка Луны</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
             ],
-            "Оператор": [{ title: '<span class="text-md">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } }],
-            "Карнавал А": [{ title: '<span class="text-md">Ротация Корали и Хелии</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/weaprot.png" } }],
-            "Наряд": [{ title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } }],
+            "Оператор": [
+                { title: '<span class="text-md">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
+                { title: '<span class="text-md">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
+                { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
+            ],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/rot.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/weaprot.png" } }],
+            "Наряд": [
+                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
+                { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
+            ],
         };
-
         const imageCache = new Map();
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-        async function convertToDataURL(url) {
-            if (!url || !url.startsWith('http')) return url;
+        async function fetchImage(url) {
             if (imageCache.has(url)) return imageCache.get(url);
 
-            const cleanUrl = url.split('?')[0];
+            try {
+                const res = await fetch(url, { mode: 'cors' });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const data = await new Promise(r => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => r(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    imageCache.set(url, data);
+                    return data;
+                }
+            } catch(e) {}
 
             for (const proxy of PROXIES) {
                 try {
-                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
-                    if (!response.ok) continue;
-                    const blob = await response.blob();
-                    return await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            imageCache.set(url, reader.result);
-                            resolve(reader.result);
-                        };
-                        reader.readAsDataURL(blob);
-                    });
-                } catch (e) { continue; }
+                    const res = await fetch(`${proxy}${encodeURIComponent(url)}`);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const data = await new Promise(r => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => r(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        imageCache.set(url, data);
+                        return data;
+                    }
+                } catch(e) {}
             }
 
-            return new Promise((resolve) => {
+            return new Promise(resolve => {
                 const img = new Image();
-                img.crossOrigin = "Anonymous";
+                img.crossOrigin = "anonymous";
                 img.onload = () => {
-                    const canvas = document.createElement("canvas");
+                    const canvas = document.createElement('canvas');
                     canvas.width = img.width; canvas.height = img.height;
-                    canvas.getContext("2d").drawImage(img, 0, 0);
-                    const res = canvas.toDataURL("image/png");
-                    imageCache.set(url, res);
-                    resolve(res);
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const data = canvas.toDataURL();
+                    imageCache.set(url, data);
+                    resolve(data);
                 };
                 img.onerror = () => resolve(EMPTY_IMG);
                 img.src = url;
@@ -265,20 +290,15 @@
 
         async function preloadAll() {
             const urls = [];
-            Object.values(supplyData).forEach(cat => {
-                cat.forEach(item => {
-                    if (item.icons) {
-                        Object.values(item.icons).forEach(u => { if(u) urls.push(u); });
-                    }
-                });
-            });
-
+            Object.values(supplyData).forEach(cat => cat.forEach(item => {
+                if (item.icons) Object.values(item.icons).forEach(u => u && urls.push(u));
+            }));
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
             for (let i = 0; i < uniqueUrls.length; i++) {
-                loadingText.innerText = `Подготовка графики: ${i + 1} / ${uniqueUrls.length}`;
-                await convertToDataURL(uniqueUrls[i]);
+                loadingText.innerText = `Загрузка: ${i+1}/${uniqueUrls.length}`;
+                await fetchImage(uniqueUrls[i]);
             }
 
             document.getElementById('loading-overlay').style.opacity = '0';
@@ -318,12 +338,11 @@
                     if (startCell && endCell) {
                         const card = document.createElement('div');
                         card.className = 'supply-card';
-                        const w = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft;
-                        card.style.width = `${w - 8}px`;
+                        card.style.width = `${(endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 8}px`;
                         card.style.left = `4px`;
 
-                        const getSrc = (key) => item.icons && item.icons[key] ? (imageCache.get(item.icons[key]) || EMPTY_IMG) : null;
-
+                        const getSrc = (k) => item.icons[k] ? (imageCache.get(item.icons[k]) || EMPTY_IMG) : null;
+                        
                         let assetsHtml = '';
                         if (item.icons.extra) {
                             assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon">`;
@@ -342,7 +361,7 @@
                             assetsHtml = `${miniStack}${main ? `<img src="${main}" class="main-icon">` : ''}`;
                         }
 
-                        card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content"><span>${item.title}</span></div>`;
+                        card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
                         startCell.appendChild(card);
                     }
                 });
@@ -352,6 +371,7 @@
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
+            const originalText = btn.innerText;
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
 
@@ -359,18 +379,19 @@
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    skipFonts: true 
+                    fontEmbedCSS: "", 
+                    style: { transform: 'scale(1)', transformOrigin: 'top left' }
                 });
                 
                 const link = document.createElement('a');
-                link.download = `Schedule_${Date.now()}.png`;
+                link.download = `HI3_Schedule.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error("Screenshot error:", e);
-                alert("Ошибка скриншота. Проблема с доступом к стилям шрифтов.");
+                console.error(e);
+                alert("Ошибка при создании скриншота.");
             } finally {
-                btn.innerText = "Создать скриншот";
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
