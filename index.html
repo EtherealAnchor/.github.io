@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style id="dynamic-fonts"></style>
     <style>
         body {
             background-color: #FEF8F2;
@@ -235,11 +235,10 @@
                 { title: '<span class="text-md">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
                 { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-
-            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки Корали, Хелии, Кианы и Виты</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки: Корали, Хелия, Киана, Вита</span>', startWeek: 2, duration: 3, icons: { extra: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png" } }],
             "Наряд": [
-                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png" } },
+                { title: '<span class="text-md">Изящная Луна</span>', startWeek: 2, duration: 3, icons: { main: "images/cnEly.png" } },
                 { title: '<span class="text-md">Молитвы зимы, новые мечтания</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
@@ -250,10 +249,8 @@
             for (let proxy of proxies) {
                 for (let i = 0; i < retries; i++) {
                     try {
-                        const targetUrl = `${proxy}${encodeURIComponent(url)}`;
-                        const response = await fetch(targetUrl, { 
-                            cache: 'force-cache' 
-                        });
+                        const targetUrl = url.startsWith('http') ? `${proxy}${encodeURIComponent(url)}` : url;
+                        const response = await fetch(targetUrl, { cache: 'force-cache' });
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         return await response.blob();
                     } catch (e) {
@@ -262,13 +259,12 @@
                     }
                 }
             }
-            throw new Error(`Failed to load ${url} after trying all proxies.`);
+            throw new Error(`Failed to load ${url}`);
         }
 
         async function fetchImageAsDataURL(url) {
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
-            
             try {
                 const blob = await fetchWithRetry(url);
                 const base64 = await new Promise((resolve) => {
@@ -276,16 +272,28 @@
                     reader.onloadend = () => resolve(reader.result);
                     reader.readAsDataURL(blob);
                 });
-                
                 imageCache.set(url, base64);
                 return base64;
             } catch (e) {
-                console.error("Critical image load failure:", url, e);
+                console.warn("Image load failed, using placeholder:", url);
                 return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             }
         }
 
+        // Фикс SecurityError для шрифтов Google Fonts
+        async function setupFonts() {
+            const fontUrl = "https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap";
+            try {
+                const blob = await fetchWithRetry(fontUrl);
+                const text = await blob.text();
+                document.getElementById('dynamic-fonts').textContent = text;
+            } catch (e) {
+                console.error("Font loading failed", e);
+            }
+        }
+
         async function preloadResources() {
+            await setupFonts();
             const urls = [];
             Object.values(supplyData).forEach(cat => {
                 cat.forEach(item => {
@@ -300,24 +308,18 @@
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
-            const chunks = [];
             const chunkSize = 4;
             for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
-                chunks.push(uniqueUrls.slice(i, i + chunkSize));
-            }
-
-            let loaded = 0;
-            for (const chunk of chunks) {
+                const chunk = uniqueUrls.slice(i, i + chunkSize);
                 await Promise.all(chunk.map(async u => {
                     await fetchImageAsDataURL(u);
-                    loaded++;
-                    loadingText.innerText = `Загрузка: ${Math.round((loaded / uniqueUrls.length) * 100)}%`;
                 }));
+                loadingText.innerText = `Загрузка: ${Math.round((Math.min(i + chunkSize, uniqueUrls.length) / uniqueUrls.length) * 100)}%`;
             }
             
             const loader = document.getElementById('loading-overlay');
             loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 500);
+            setTimeout(() => loader.style.display = 'none', 200);
             
             renderBanners();
         }
@@ -416,8 +418,15 @@
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    cacheBust: false,
-                    quality: 1.0
+                    style: {
+                        transform: 'scale(1)',
+                    },
+                    filter: (element) => {
+                        if (element.tagName === 'LINK' && element.rel === 'stylesheet') {
+                            return false;
+                        }
+                        return true;
+                    }
                 });
                 
                 const link = document.createElement('a');
@@ -426,7 +435,11 @@
                 link.click();
             } catch (error) {
                 console.error('Screenshot error:', error);
-                alert("Не удалось создать скриншот. Попробуйте ещё раз.");
+                const imgs = node.querySelectorAll('img');
+                imgs.forEach(img => {
+                    if (!img.complete || img.naturalWidth === 0) console.warn('Broken img in capture:', img.src);
+                });
+                alert("Ошибка при создании скриншота. Попробуйте обновить страницу.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
