@@ -154,7 +154,7 @@
         #loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -172,7 +172,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка данных...</p>
+        <p class="text-white font-bold" id="loading-text">Инициализация ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -203,8 +203,9 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const PROXIES = [
+            "https://corsproxy.io/?",
             "https://api.allorigins.win/raw?url=",
-            "https://corsproxy.io/?"
+            "https://thingproxy.freeboard.io/fetch/"
         ];
 
         const supplyData = {
@@ -228,25 +229,29 @@
             if (!url || !url.startsWith('http')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
 
-            const attemptFetch = async (proxyUrl) => {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error();
-                const blob = await response.blob();
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-            };
-
+            const blobToDataURL = (blob) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
             for (const proxy of PROXIES) {
                 try {
-                    const data = await attemptFetch(`${proxy}${encodeURIComponent(url)}`);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) continue;
+                    const blob = await response.blob();
+                    if (blob.size < 100) continue; 
+
+                    const data = await blobToDataURL(blob);
                     imageCache.set(url, data);
                     return data;
                 } catch (e) { continue; }
             }
+
             try {
                 return await new Promise((resolve) => {
                     const img = new Image();
@@ -262,7 +267,7 @@
                         resolve(dataURL);
                     };
                     img.onerror = () => resolve(EMPTY_IMG);
-                    img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+                    img.src = url + (url.includes('?') ? '&' : '?') + 'cache=' + Math.random();
                 });
             } catch (e) {
                 return EMPTY_IMG;
@@ -274,7 +279,7 @@
             Object.values(supplyData).forEach(cat => {
                 cat.forEach(item => {
                     if (item.icons) {
-                        Object.values(item.icons).forEach(u => urls.push(u));
+                        Object.values(item.icons).forEach(u => { if(u) urls.push(u); });
                     }
                 });
             });
@@ -282,9 +287,11 @@
             const uniqueUrls = [...new Set(urls)];
             const loadingText = document.getElementById('loading-text');
             
-            for (let i = 0; i < uniqueUrls.length; i++) {
-                loadingText.innerText = `Синхронизация ресурсов: ${i + 1} / ${uniqueUrls.length}`;
-                await convertToDataURL(uniqueUrls[i]);
+            const batchSize = 3;
+            for (let i = 0; i < uniqueUrls.length; i += batchSize) {
+                const batch = uniqueUrls.slice(i, i + batchSize);
+                loadingText.innerText = `Загрузка ресурсов: ${Math.min(i + batchSize, uniqueUrls.length)} / ${uniqueUrls.length}`;
+                await Promise.all(batch.map(u => convertToDataURL(u)));
             }
 
             document.getElementById('loading-overlay').style.opacity = '0';
@@ -331,23 +338,34 @@
                         card.style.width = `${w - 8}px`;
                         card.style.left = `4px`;
 
-                        const getI = (key) => imageCache.get(item.icons[key]) || EMPTY_IMG;
+                        const getSrc = (key) => item.icons && item.icons[key] ? (imageCache.get(item.icons[key]) || EMPTY_IMG) : null;
 
+                        let assetsHtml = '';
                         if (item.icons.extra) {
-                            card.innerHTML = `<div class="supply-assets"><img src="${getI('extra')}" class="extra-icon"></div>
-                                              <div class="supply-content"><span>${item.title}</span></div>`;
+                            assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon">`;
                         } else {
-                            card.innerHTML = `
-                                <div class="supply-assets">
-                                    <div class="mini-icons-stack">
-                                        <img src="${getI('rank')}" class="mini-icon">
-                                        <img src="${getI('type')}" class="mini-icon">
-                                    </div>
-                                    <img src="${getI('main')}" class="main-icon">
+                            const rank = getSrc('rank');
+                            const type = getSrc('type');
+                            const main = getSrc('main');
+
+                            // Генерируем стопку иконок только если они есть
+                            const miniStack = (rank || type) ? `
+                                <div class="mini-icons-stack">
+                                    ${rank ? `<img src="${rank}" class="mini-icon">` : ''}
+                                    ${type ? `<img src="${type}" class="mini-icon">` : ''}
                                 </div>
-                                <div class="supply-content"><span>${item.title}</span></div>
+                            ` : '';
+
+                            assetsHtml = `
+                                ${miniStack}
+                                ${main ? `<img src="${main}" class="main-icon">` : ''}
                             `;
                         }
+
+                        card.innerHTML = `
+                            <div class="supply-assets">${assetsHtml}</div>
+                            <div class="supply-content"><span>${item.title}</span></div>
+                        `;
                         startCell.appendChild(card);
                     }
                 });
@@ -361,13 +379,10 @@
             btn.disabled = true;
 
             try {
-                renderBanners();
-                await new Promise(r => setTimeout(r, 400));
-
+                await window.htmlToImage.toPng(node); 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
-                    backgroundColor: '#FEF8F2',
-                    style: { borderRadius: '0' }
+                    backgroundColor: '#FEF8F2'
                 });
                 
                 const link = document.createElement('a');
@@ -375,8 +390,7 @@
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error(e);
-                alert("Ошибка! Попробуйте обновить страницу.");
+                alert("Ошибка сохранения. Попробуйте еще раз.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
