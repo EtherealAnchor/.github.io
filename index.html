@@ -261,9 +261,29 @@
                 { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
-
         const imageCache = new Map();
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        
+
+        async function fetchImageAsBase64(url) {
+            if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
+            
+            for (const proxy of PROXIES) {
+                try {
+                    const response = await fetch(proxy + encodeURIComponent(url));
+                    if (!response.ok) continue;
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch (e) {
+                    console.warn(`Proxy ${proxy} failed for ${url}`);
+                }
+            }
+            return url;
+        }
 
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
@@ -336,37 +356,47 @@
             const btn = document.getElementById('screenshotBtn');
             btn.innerText = "⌛ Обработка...";
             btn.disabled = true;
+
             try {
+                const imgs = node.querySelectorAll('img');
+                const proxyPromises = Array.from(imgs).map(async (img) => {
+                    const originalSrc = img.src;
+                    if (originalSrc.includes('mihoyo.com') || originalSrc.includes('wikia.nocookie.net')) {
+                        const base64 = await fetchImageAsBase64(originalSrc);
+                        if (base64) img.src = base64;
+                    }
+                });
+                
+                await Promise.all(proxyPromises);
                 await document.fonts.ready;
                 
+                // Генерируем PNG
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
                     style: {
                         fontFamily: "'Inter', sans-serif",
                     },
-                    canvasWidth: node.scrollWidth * 2,
-                    canvasHeight: node.scrollHeight * 2,
                     fontEmbedCSS: '', 
+                    cacheBust: true,
                 });
                 
                 const link = document.createElement('a');
                 link.download = `Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
+                renderBanners();
+
             } catch (e) {
                 console.error("Ошибка скриншота:", e);
                 try {
                     const dataUrlFallback = await window.htmlToImage.toPng(node, {
                         pixelRatio: 2,
                         backgroundColor: '#FEF8F2',
-                        skipFonts: true,
-                        style: {
-                            fontFamily: "sans-serif"
-                        }
+                        skipFonts: true
                     });
                     const link = document.createElement('a');
-                    link.download = `Schedule_Fallback_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `Schedule_Simple_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = dataUrlFallback;
                     link.click();
                 } catch (e2) {
