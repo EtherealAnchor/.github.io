@@ -86,10 +86,9 @@
         }
 
         .week-name { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; display: block; }
-        .week-dates { font-size: 0.7rem; font-weight: 1000; opacity: 0.7; margin-top: 1px; display: block; }
+        .week-dates { font-size: 0.7rem; font-weight: 800; opacity: 0.7; margin-top: 1px; display: block; }
 
-        .category-cell {
-            background: rgba(0, 0, 0, 0.4);
+        .category-cell, .category-cell-alt {
             padding: 12px;
             font-weight: 700;
             font-size: 0.95rem;
@@ -101,24 +100,11 @@
             position: relative;
         }
 
-        .category-cell-alt {
-            background: rgba(152, 102, 153, 0.6);
-            padding: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            border-radius: 16px;
-            white-space: nowrap;
-            width: 180px;
-            backdrop-filter: blur(4px);
-            text-align: center;
-            color: #fff;
-            position: relative;
-        }
+        .category-cell { background: rgba(0, 0, 0, 0.4); }
+        .category-cell-alt { background: rgba(152, 102, 153, 0.6); color: #fff; }
         
         .category-cell:hover .row-controls,
-        .category-cell-alt:hover .row-controls { 
-            opacity: 1; 
-        }
+        .category-cell-alt:hover .row-controls { opacity: 1; }
 
         .row-controls {
             position: absolute;
@@ -186,8 +172,23 @@
             transition: opacity 0.5s;
         }
 
-        .text-lg { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; }
-        .text-xs { font-size: 1rem !important; font-style: italic; font-weight: 800; opacity: 0.9; margin-top: 4px; display: block; }
+        .text-lg { 
+            font-size: 1.1rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            display: block;
+        }
+        
+        .text-xs-custom { 
+            font-size: 16px;
+            font-style: italic; 
+            font-weight: 800; 
+            color: #2d0a2a;
+            opacity: 0.85; 
+            margin-top: 4px; 
+            display: block;
+            line-height: 1.2;
+        }
         
         .controls-panel {
             background: #2d0a2a;
@@ -198,7 +199,6 @@
         }
 
         .btn-add { background: #9d1c8c; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        
         .exporting .row-controls { display: none !important; }
     </style>
 </head>
@@ -206,7 +206,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка локальных ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка интерфейса...</p>
     </div>
 
     <nav class="nav-container">
@@ -225,7 +225,9 @@
         <div class="capture-wrapper" id="capture-area">
             <table id="supplyTable">
                 <thead>
-                    <tr id="weeksHeader"><th style="width: 200px; background: transparent !important; border: 3px solid transparent;"></th></tr>
+                    <tr id="weeksHeader">
+                        <th style="width: 200px; background: transparent !important; border: 3px solid transparent;"></th>
+                    </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -238,9 +240,9 @@
 
         let eventsList = [
             { id: 1, category: "Событие 1", title: '<span class="text-lg">Основное событие на трату кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
-            { id: 2, category: "Событие 2", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
-            { id: 3, category: "Событие 3", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
-            { id: 4, category: "Событие 4", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
+            { id: 2, category: "Событие 2", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
+            { id: 3, category: "Событие 3", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
+            { id: 4, category: "Событие 4", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
             { id: 5, category: "Событие 5", title: '<span class="text-lg">Весенне лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
             { id: 6, category: "Событие 6", title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
             { id: 7, category: "Событие 7", title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
@@ -333,18 +335,23 @@
             btn.disabled = true;
             
             try {
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 200));
+                
                 const dataUrl = await window.htmlToImage.toPng(node, {
-                    pixelRatio: 2,
-                    backgroundColor: '#FEF8F2',
-                    cacheBust: true
+                    pixelRatio: 2.5,
+                    backgroundColor: '#594AA8',
+                    cacheBust: true,
+                    style: {
+                        borderRadius: '0px'
+                    }
                 });
+                
                 const link = document.createElement('a');
-                link.download = `HI3_Events_${new Date().toISOString().slice(0,10)}.png`;
+                link.download = `Events_Export_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error(e);
+                console.error("Ошибка экспорта:", e);
             } finally {
                 node.classList.remove('exporting');
                 btn.innerText = "Создать скриншот";
