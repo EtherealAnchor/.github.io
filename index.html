@@ -61,7 +61,8 @@
             background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
-            padding-bottom: 20px;
+            padding: 10px;
+            padding-bottom: 25px;
         }
 
         table {
@@ -171,26 +172,17 @@
             line-height: 1.1;
         }
 
-        .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.1rem; font-weight: 900; }
+        .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.05rem; font-weight: 900; }
         .duration-1 .text-md { font-size: 0.7rem; font-weight: 800; }
-        .duration-1 .text-xs { font-size: 0.6rem; }
 
         .duration-2 .text-lg, .duration-2 .text-ex { font-size: 1.25rem; font-weight: 900; }
         .duration-2 .text-md { font-size: 0.85rem; font-weight: 900; }
 
         .duration-3 .text-lg, .duration-3 .text-ex { font-size: 1.35rem; font-weight: 900; }
-        .duration-3 .text-md { font-size: 1.25rem; font-weight: 900; }
+        .duration-3 .text-md { font-size: 1.15rem; font-weight: 900; }
 
-        .duration-4-plus .text-lg, .duration-4-plus .text-ex { font-size: 1.8rem; font-weight: 900; }
+        .duration-4-plus .text-lg, .duration-4-plus .text-ex { font-size: 1.6rem; font-weight: 900; }
         .duration-4-plus .text-md { font-size: 1.2rem; font-weight: 800; }
-
-        .text-xs { 
-            font-size: clamp(0.65rem, 1vw, 0.85rem); 
-            font-style: italic; 
-            font-weight: 800; 
-            opacity: 0.9;
-            margin-top: 2px;
-        }
 
         #loading-overlay {
             position: fixed;
@@ -236,6 +228,12 @@
         const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
+        const PROXIES = [
+            "https://api.allorigins.win/raw?url=",
+            "https://corsproxy.io/?",
+            "https://api.codetabs.com/v1/proxy?quest="
+        ];
+
         const supplyData = {
             "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
             "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
@@ -260,6 +258,59 @@
         const imageCache = new Map();
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+        async function fetchImageBase64(url) {
+            if (!url) return EMPTY_IMG;
+            if (url.startsWith('data:')) return url;
+
+            if (!url.startsWith('http')) {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    return new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch(e) { return EMPTY_IMG; }
+            }
+
+            for (const proxy of PROXIES) {
+                try {
+                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        return new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    }
+                } catch (e) { continue; }
+            }
+            return EMPTY_IMG;
+        }
+
+        async function preloadAll() {
+            const urls = [];
+            Object.values(supplyData).forEach(cat => cat.forEach(item => {
+                if (item.icons) Object.values(item.icons).forEach(u => u && urls.push(u));
+            }));
+            const uniqueUrls = [...new Set(urls)];
+            const loadingText = document.getElementById('loading-text');
+            
+            for (let i = 0; i < uniqueUrls.length; i++) {
+                loadingText.innerText = `Загрузка ресурсов: ${Math.round((i/uniqueUrls.length)*100)}%`;
+                const b64 = await fetchImageBase64(uniqueUrls[i]);
+                imageCache.set(uniqueUrls[i], b64);
+            }
+            
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+                renderBanners();
+            }, 500);
+        }
+
         function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
@@ -276,12 +327,7 @@
                     Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
                 tbody.appendChild(tr);
             });
-            
-            setTimeout(() => {
-                document.getElementById('loading-overlay').style.opacity = '0';
-                setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
-                renderBanners();
-            }, 800);
+            preloadAll();
         }
 
         function renderBanners() {
@@ -295,7 +341,6 @@
                     
                     if (startCell && endCell) {
                         const card = document.createElement('div');
-                        
                         let durationClass = 'duration-1';
                         if (item.duration === 2) durationClass = 'duration-2';
                         else if (item.duration === 3) durationClass = 'duration-3';
@@ -307,17 +352,19 @@
                         card.style.width = `${width}px`;
                         card.style.left = `${internalPadding}px`;
 
+                        const getSrc = (k) => imageCache.get(item.icons[k]) || EMPTY_IMG;
+
                         let assetsHtml = '';
                         if (item.icons.extra) {
-                            assetsHtml = `<img src="${item.icons.extra}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
+                            assetsHtml = `<img src="${getSrc('extra')}" class="extra-icon">`;
                         } else {
                             const miniStack = (item.icons.rank || item.icons.type) ? `
                                 <div class="mini-icons-stack">
-                                    ${item.icons.rank ? `<img src="${item.icons.rank}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
-                                    ${item.icons.type ? `<img src="${item.icons.type}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
+                                    ${item.icons.rank ? `<img src="${getSrc('rank')}" class="mini-icon">` : ''}
+                                    ${item.icons.type ? `<img src="${getSrc('type')}" class="mini-icon">` : ''}
                                 </div>
                             ` : '';
-                            assetsHtml = `${miniStack}${item.icons.main ? `<img src="${item.icons.main}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
+                            assetsHtml = `${miniStack}${item.icons.main ? `<img src="${getSrc('main')}" class="main-icon">` : ''}`;
                         }
                         card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
                         startCell.appendChild(card);
@@ -329,22 +376,25 @@
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
+            const originalText = btn.innerText;
             btn.innerText = "⌛ Обработка...";
             btn.disabled = true;
             try {
-                await document.fonts.ready;
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
+                    skipFonts: true, // Пропускаем CORS-проблемные шрифты Google
+                    cacheBust: true
                 });
                 const link = document.createElement('a');
                 link.download = `Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error(e);
+                console.error('Screenshot error:', e);
+                alert("Ошибка при создании скриншота. Проверьте консоль.");
             } finally {
-                btn.innerText = "Создать скриншот";
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
