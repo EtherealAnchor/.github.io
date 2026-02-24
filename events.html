@@ -187,7 +187,7 @@
         }
 
         .text-lg { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; }
-        .text-xs { font-size: 0.95rem; font-style: italic; font-weight: 700; opacity: 0.8; margin-top: 4px; }
+        .text-xs { font-size: 1rem; font-style: italic; font-weight: 800; opacity: 0.9; margin-top: 4px; }
         
         .controls-panel {
             background: #2d0a2a;
@@ -206,7 +206,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка локальных ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -246,34 +246,6 @@
             { id: 7, category: "Событие 7", title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
         ];
 
-        const PROXIES = [
-            "https://corsproxy.io/?",
-            "https://api.allorigins.win/raw?url=",
-            "https://api.codetabs.com/v1/proxy?quest="
-        ];
-
-        const imageCache = new Map();
-        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-        async function fetchImage(url) {
-            if (imageCache.has(url)) return imageCache.get(url);
-            for (const proxy of PROXIES) {
-                try {
-                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
-                    if (!response.ok) continue;
-                    const blob = await response.blob();
-                    const dataUrl = await new Promise(r => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => r(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                    imageCache.set(url, dataUrl);
-                    return dataUrl;
-                } catch (e) { console.warn("Proxy failed", proxy); }
-            }
-            return EMPTY_IMG;
-        }
-
         function addNewEvent() {
             const nextId = eventsList.length > 0 ? Math.max(...eventsList.map(e => e.id)) + 1 : 1;
             eventsList.push({
@@ -282,7 +254,7 @@
                 title: '<span class="text-lg">Новое событие</span>',
                 startWeek: 1,
                 duration: 1,
-                icon: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"
+                icon: "images/spend.png"
             });
             renderTable();
         }
@@ -299,7 +271,6 @@
             
             eventsList.forEach((event, index) => {
                 const tr = document.createElement('tr');
-                // Чередование классов для цвета
                 const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
                 
                 tr.innerHTML = `
@@ -316,7 +287,7 @@
             renderBanners();
         }
 
-        async function renderBanners() {
+        function renderBanners() {
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
             
             for (const event of eventsList) {
@@ -332,10 +303,9 @@
                     card.style.width = `${width}px`;
                     card.style.left = `${padding}px`;
 
-                    const imgSrc = await fetchImage(event.icon);
                     card.innerHTML = `
                         <div class="supply-assets">
-                            <img src="${imgSrc}" class="extra-icon">
+                            <img src="${event.icon}" class="extra-icon" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
                         </div>
                         <div class="supply-content">${event.title}</div>
                     `;
@@ -363,10 +333,11 @@
             btn.disabled = true;
             
             try {
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 100));
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
-                    backgroundColor: '#FEF8F2'
+                    backgroundColor: '#FEF8F2',
+                    cacheBust: true
                 });
                 const link = document.createElement('a');
                 link.download = `HI3_Events_${new Date().toISOString().slice(0,10)}.png`;
@@ -381,7 +352,7 @@
             }
         }
 
-        window.onload = async () => {
+        window.onload = () => {
             initHeader();
             renderTable();
             document.getElementById('loading-overlay').style.opacity = '0';
