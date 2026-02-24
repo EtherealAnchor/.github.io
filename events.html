@@ -21,7 +21,6 @@
         body::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Гарантируем, что шрифт применяется ко всем элементам на скриншоте */
         #capture-area, #capture-area * {
             font-family: 'Inter', sans-serif !important;
         }
@@ -74,7 +73,7 @@
             border-collapse: collapse;
             table-layout: fixed;
             background: transparent;
-            min-width: 1200px;
+            min-width: 1100px;
         }
 
         th, td {
@@ -88,42 +87,36 @@
             text-align: center;
             color: white;
             border-radius: 12px;
+            position: relative;
+        }
+
+        .week-cell:hover .row-controls { opacity: 1; }
+
+        .row-controls {
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 50;
+        }
+
+        .btn-row-del { 
+            background: #ef4444; 
+            color: white; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            font-size: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            border: 1px solid white;
         }
 
         .week-name { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; display: block; }
         .week-dates { font-size: 0.7rem; font-weight: 800; opacity: 0.7; margin-top: 1px; display: block; }
-
-        .category-cell, .category-cell-alt {
-            padding: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            border-radius: 16px;
-            white-space: nowrap;
-            width: 180px;
-            backdrop-filter: blur(4px);
-            text-align: center;
-            position: relative;
-        }
-
-        .category-cell { background: rgba(0, 0, 0, 0.4); }
-        .category-cell-alt { background: rgba(152, 102, 153, 0.6); color: #fff; }
-        
-        .category-cell:hover .row-controls,
-        .category-cell-alt:hover .row-controls { opacity: 1; }
-
-        .row-controls {
-            position: absolute;
-            left: -30px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .btn-row-del { background: #ef4444; color: white; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
         .content-cell {
             position: relative;
@@ -204,7 +197,7 @@
             gap: 10px;
         }
 
-        .btn-add { background: #9d1c8c; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-add { background: #9d1c8c; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; }
         .exporting .row-controls { display: none !important; }
     </style>
 </head>
@@ -232,7 +225,6 @@
             <table id="supplyTable">
                 <thead>
                     <tr id="weeksHeader">
-                        <th style="width: 200px; background: transparent !important; border: 3px solid transparent;"></th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -245,20 +237,19 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         let eventsList = [
-            { id: 1, category: "Событие 1", title: '<span class="text-lg">Основное событие на трату кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
-            { id: 2, category: "Событие 2", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
-            { id: 3, category: "Событие 3", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
-            { id: 4, category: "Событие 4", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
-            { id: 5, category: "Событие 5", title: '<span class="text-lg">Весеннее лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
-            { id: 6, category: "Событие 6", title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
-            { id: 7, category: "Событие 7", title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
+            { id: 1, title: '<span class="text-lg">Основное событие на трату кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
+            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
+            { id: 3, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
+            { id: 4, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
+            { id: 5, title: '<span class="text-lg">Весеннее лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
+            { id: 6, title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
+            { id: 7, title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
         ];
 
         function addNewEvent() {
             const nextId = eventsList.length > 0 ? Math.max(...eventsList.map(e => e.id)) + 1 : 1;
             eventsList.push({
                 id: nextId,
-                category: `Событие ${eventsList.length + 1}`,
                 title: '<span class="text-lg">Новое событие</span>',
                 startWeek: 1,
                 duration: 1,
@@ -269,7 +260,6 @@
 
         function deleteEvent(id) {
             eventsList = eventsList.filter(e => e.id !== id);
-            eventsList.forEach((e, i) => e.category = `Событие ${i + 1}`);
             renderTable();
         }
 
@@ -279,16 +269,16 @@
             
             eventsList.forEach((event, index) => {
                 const tr = document.createElement('tr');
-                const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
-                
+
                 tr.innerHTML = `
-                    <td class="${cellClass}">
-                        <div class="row-controls">
-                            <div class="btn-row-del" onclick="deleteEvent(${event.id})">✕</div>
-                        </div>
-                        ${event.category}
-                    </td>
-                    ${Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${event.id}-${i+1}"></td>`).join('')}
+                    ${Array.from({length: totalWeeks}, (_, i) => {
+                        const weekNum = i + 1;
+                        const controls = (weekNum === 1) ? `
+                            <div class="row-controls">
+                                <button class="btn-row-del" onclick="deleteEvent(${event.id})">✕</button>
+                            </div>` : '';
+                        return `<td class="content-cell" id="cell-${event.id}-${weekNum}">${controls}</td>`;
+                    }).join('')}
                 `;
                 tbody.appendChild(tr);
             });
@@ -307,7 +297,11 @@
                     const card = document.createElement('div');
                     card.className = 'supply-card';
                     const padding = 4;
-                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - (padding * 2);
+
+                    const startPos = startCell.offsetLeft;
+                    const endPos = endCell.offsetLeft + endCell.offsetWidth;
+                    const width = endPos - startPos - (padding * 2);
+                    
                     card.style.width = `${width}px`;
                     card.style.left = `${padding}px`;
 
@@ -324,6 +318,7 @@
 
         function initHeader() {
             const headerRow = document.getElementById('weeksHeader');
+            headerRow.innerHTML = ''; // Очистка
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
