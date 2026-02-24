@@ -209,7 +209,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Кэширование ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -269,7 +269,6 @@
 
         async function fetchImageAsBase64(url) {
             if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
-
             if (imageCache.has(url)) return imageCache.get(url);
             
             for (const proxy of PROXIES) {
@@ -282,25 +281,24 @@
                         reader.onloadend = () => resolve(reader.result);
                         reader.readAsDataURL(blob);
                     });
-                    
                     imageCache.set(url, base64);
                     return base64;
-                } catch (e) {
-                    console.warn(`Proxy ${proxy} failed for ${url}`);
-                }
+                } catch (e) {}
             }
-            return url; 
+            return url;
         }
 
-        function initTable() {
+        async function initTable() {
             const headerRow = document.getElementById('weeksHeader');
             const tbody = document.getElementById('tableBody');
+            
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
                 th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
                 headerRow.appendChild(th);
             }
+            
             categories.forEach((cat, index) => {
                 const tr = document.createElement('tr');
                 const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
@@ -308,26 +306,36 @@
                     Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
                 tbody.appendChild(tr);
             });
+
+            const allUrls = [];
+            Object.values(supplyData).flat().forEach(item => {
+                if (item.icons.main) allUrls.push(item.icons.main);
+                if (item.icons.rank) allUrls.push(item.icons.rank);
+                if (item.icons.type) allUrls.push(item.icons.type);
+                if (item.icons.extra) allUrls.push(item.icons.extra);
+            });
+
+            await Promise.all(allUrls.map(url => fetchImageAsBase64(url)));
+
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
             
-            setTimeout(() => {
-                document.getElementById('loading-overlay').style.opacity = '0';
-                setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
-                renderBanners();
-            }, 800);
+            await renderBanners();
         }
 
-        function renderBanners() {
+        async function renderBanners() {
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
-            categories.forEach(cat => {
+            
+            const renderPromises = categories.map(async (cat) => {
                 if (!supplyData[cat]) return;
-                supplyData[cat].forEach(item => {
+                
+                for (const item of supplyData[cat]) {
                     const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
                     const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
                     const endCell = document.getElementById(`cell-${cat}-${endWeekNum}`);
                     
                     if (startCell && endCell) {
                         const card = document.createElement('div');
-                        
                         let durationClass = 'duration-1';
                         if (item.duration === 2) durationClass = 'duration-2';
                         else if (item.duration === 3) durationClass = 'duration-3';
@@ -339,25 +347,36 @@
                         card.style.width = `${width}px`;
                         card.style.left = `${internalPadding}px`;
 
-                        const getIconSrc = (url) => imageCache.has(url) ? imageCache.get(url) : url;
+                        const getCached = async (url) => {
+                            if (!url) return null;
+                            if (imageCache.has(url)) return imageCache.get(url);
+                            return await fetchImageAsBase64(url);
+                        };
 
                         let assetsHtml = '';
                         if (item.icons.extra) {
-                            assetsHtml = `<img src="${getIconSrc(item.icons.extra)}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
+                            const src = await getCached(item.icons.extra);
+                            assetsHtml = `<img src="${src || EMPTY_IMG}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
                         } else {
-                            const miniStack = (item.icons.rank || item.icons.type) ? `
+                            const mainSrc = await getCached(item.icons.main);
+                            const rankSrc = await getCached(item.icons.rank);
+                            const typeSrc = await getCached(item.icons.type);
+
+                            const miniStack = (rankSrc || typeSrc) ? `
                                 <div class="mini-icons-stack">
-                                    ${item.icons.rank ? `<img src="${getIconSrc(item.icons.rank)}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
-                                    ${item.icons.type ? `<img src="${getIconSrc(item.icons.type)}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
+                                    ${rankSrc ? `<img src="${rankSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
+                                    ${typeSrc ? `<img src="${typeSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
                                 </div>
                             ` : '';
-                            assetsHtml = `${miniStack}${item.icons.main ? `<img src="${getIconSrc(item.icons.main)}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
+                            assetsHtml = `${miniStack}${mainSrc ? `<img src="${mainSrc}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
                         }
                         card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
                         startCell.appendChild(card);
                     }
-                });
+                }
             });
+
+            await Promise.all(renderPromises);
         }
 
         async function takeScreenshot() {
@@ -367,50 +386,28 @@
             btn.disabled = true;
 
             try {
-                const imgs = node.querySelectorAll('img');
-                const proxyPromises = Array.from(imgs).map(async (img) => {
-                    const originalSrc = img.getAttribute('src');
-                    if (originalSrc && !originalSrc.startsWith('data:') && (originalSrc.includes('mihoyo.com') || originalSrc.includes('wikia.nocookie.net'))) {
-                        const base64 = await fetchImageAsBase64(originalSrc);
-                        if (base64) img.src = base64;
-                    }
-                });
-                
-                await Promise.all(proxyPromises);
                 await document.fonts.ready;
                 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 2,
                     backgroundColor: '#FEF8F2',
-                    style: {
-                        fontFamily: "'Inter', sans-serif",
-                    },
-                    fontEmbedCSS: '', 
                     cacheBust: false,
+                    style: { fontFamily: "'Inter', sans-serif" }
                 });
                 
                 const link = document.createElement('a');
                 link.download = `Schedule_${new Date().toISOString().slice(0,10)}.png`;
                 link.href = dataUrl;
                 link.click();
-
-                renderBanners();
-
             } catch (e) {
                 console.error("Ошибка скриншота:", e);
                 try {
-                    const dataUrlFallback = await window.htmlToImage.toPng(node, {
-                        pixelRatio: 2,
-                        backgroundColor: '#FEF8F2',
-                        skipFonts: true
-                    });
+                    const dataUrlFallback = await window.htmlToImage.toPng(node, { pixelRatio: 2, skipFonts: true });
                     const link = document.createElement('a');
                     link.download = `Schedule_Simple_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = dataUrlFallback;
                     link.click();
-                } catch (e2) {
-                    console.error("Критическая ошибка отрисовки:", e2);
-                }
+                } catch (e2) {}
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
