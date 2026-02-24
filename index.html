@@ -235,7 +235,12 @@
         const totalWeeks = 8;
         const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
-
+        const PROXIES = [
+            "https://api.allorigins.win/raw?url=",
+            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
+            "https://corsproxy.io/?",
+            "https://api.codetabs.com/v1/proxy?quest="
+        ];
         const supplyData = {
             "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
             "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
