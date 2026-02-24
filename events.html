@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание событий</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FEF8F2;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: #2d0a2a;
+        }
+
+        .nav-button {
+            padding: 10px 24px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover { background: rgba(255, 255, 255, 0.2); }
+        .nav-button.active {
+            background: #9d1c8c;
+            border-color: pink;
+        }
+
+        .screenshot-button { background: #27ae60; color: white; border-color: #2ecc71; }
+
+        .table-container {
+            max-width: 1600px;
+            margin: 20px auto;
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
+        .capture-wrapper {
+            background: linear-gradient(#8347a1, #594AA8);
+            display: inline-block;
+            min-width: 100%;
+            padding: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background: transparent;
+            min-width: 1200px;
+        }
+
+        th, td {
+            border: 3px solid transparent; 
+            background-clip: padding-box !important;
+        }
+
+        .week-cell {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 5px;
+            text-align: center;
+            color: white;
+            border-radius: 12px;
+        }
+
+        .week-name { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; display: block; }
+        .week-dates { font-size: 0.7rem; font-weight: 1000; opacity: 0.7; margin-top: 1px; display: block; }
+
+        .category-cell {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            white-space: nowrap;
+            width: 180px;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            position: relative;
+        }
+
+        .category-cell-alt {
+            background: rgba(152, 102, 153, 0.6);
+            padding: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            white-space: nowrap;
+            width: 180px;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            color: #fff;
+            position: relative;
+        }
+        
+        .category-cell:hover .row-controls,
+        .category-cell-alt:hover .row-controls { 
+            opacity: 1; 
+        }
+
+        .row-controls {
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-row-del { background: #ef4444; color: white; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .content-cell {
+            position: relative;
+            height: 100px;
+            border-radius: 8px;
+        }
+
+        .supply-card {
+            background: #F5E9F4;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .supply-assets {
+            height: 100%;
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .extra-icon { width: 100%; height: 100%; object-fit: cover; }
+
+        .supply-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #2d0a2a;
+            flex: 1;
+            line-height: 1.1;
+            padding: 0 15px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .text-lg { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; }
+        .text-xs { font-size: 0.95rem; font-style: italic; font-weight: 700; opacity: 0.8; margin-top: 4px; }
+        
+        .controls-panel {
+            background: #2d0a2a;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-add { background: #9d1c8c; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        .exporting .row-controls { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
+        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
+    </div>
+
+    <nav class="nav-container">
+        <a href="index.html" class="nav-button">Расписание</a>
+        <a href="events.html" class="nav-button active">События</a>
+        <a href="er.html" class="nav-button">Элизиум</a>
+        <a href="enemies.html" class="nav-button">Боссы</a>
+        <button id="screenshotBtn" class="nav-button screenshot-button" onclick="takeScreenshot()">Создать скриншот</button>
+    </nav>
+
+    <div class="controls-panel">
+        <button class="btn-add" onclick="addNewEvent()">+ Добавить событие</button>
+    </div>
+
+    <div class="table-container">
+        <div class="capture-wrapper" id="capture-area">
+            <table id="supplyTable">
+                <thead>
+                    <tr id="weeksHeader"><th style="width: 200px; background: transparent !important; border: 3px solid transparent;"></th></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const totalWeeks = 8;
+        const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
+
+        let eventsList = [
+            { id: 1, category: "Событие 1", title: '<span class="text-lg">Основное событие на трату кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
+            { id: 2, category: "Событие 2", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
+            { id: 3, category: "Событие 3", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
+            { id: 4, category: "Событие 4", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
+            { id: 5, category: "Событие 5", title: '<span class="text-lg">Весенне лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
+            { id: 6, category: "Событие 6", title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
+            { id: 7, category: "Событие 7", title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
+        ];
+
+        const PROXIES = [
+            "https://corsproxy.io/?",
+            "https://api.allorigins.win/raw?url=",
+            "https://api.codetabs.com/v1/proxy?quest="
+        ];
+
+        const imageCache = new Map();
+        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+        async function fetchImage(url) {
+            if (imageCache.has(url)) return imageCache.get(url);
+            for (const proxy of PROXIES) {
+                try {
+                    const response = await fetch(`${proxy}${encodeURIComponent(url)}`);
+                    if (!response.ok) continue;
+                    const blob = await response.blob();
+                    const dataUrl = await new Promise(r => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => r(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    imageCache.set(url, dataUrl);
+                    return dataUrl;
+                } catch (e) { console.warn("Proxy failed", proxy); }
+            }
+            return EMPTY_IMG;
+        }
+
+        function addNewEvent() {
+            const nextId = eventsList.length > 0 ? Math.max(...eventsList.map(e => e.id)) + 1 : 1;
+            eventsList.push({
+                id: nextId,
+                category: `Событие ${eventsList.length + 1}`,
+                title: '<span class="text-lg">Новое событие</span>',
+                startWeek: 1,
+                duration: 1,
+                icon: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"
+            });
+            renderTable();
+        }
+
+        function deleteEvent(id) {
+            eventsList = eventsList.filter(e => e.id !== id);
+            eventsList.forEach((e, i) => e.category = `Событие ${i + 1}`);
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            eventsList.forEach((event, index) => {
+                const tr = document.createElement('tr');
+                // Чередование классов для цвета
+                const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
+                
+                tr.innerHTML = `
+                    <td class="${cellClass}">
+                        <div class="row-controls">
+                            <div class="btn-row-del" onclick="deleteEvent(${event.id})">✕</div>
+                        </div>
+                        ${event.category}
+                    </td>
+                    ${Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${event.id}-${i+1}"></td>`).join('')}
+                `;
+                tbody.appendChild(tr);
+            });
+            renderBanners();
+        }
+
+        async function renderBanners() {
+            document.querySelectorAll('.supply-card').forEach(el => el.remove());
+            
+            for (const event of eventsList) {
+                const startCell = document.getElementById(`cell-${event.id}-${event.startWeek}`);
+                const endWeekNum = Math.min(event.startWeek + event.duration - 1, totalWeeks);
+                const endCell = document.getElementById(`cell-${event.id}-${endWeekNum}`);
+                
+                if (startCell && endCell) {
+                    const card = document.createElement('div');
+                    card.className = 'supply-card';
+                    const padding = 4;
+                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - (padding * 2);
+                    card.style.width = `${width}px`;
+                    card.style.left = `${padding}px`;
+
+                    const imgSrc = await fetchImage(event.icon);
+                    card.innerHTML = `
+                        <div class="supply-assets">
+                            <img src="${imgSrc}" class="extra-icon">
+                        </div>
+                        <div class="supply-content">${event.title}</div>
+                    `;
+                    startCell.appendChild(card);
+                }
+            }
+        }
+
+        function initHeader() {
+            const headerRow = document.getElementById('weeksHeader');
+            for (let i = 1; i <= totalWeeks; i++) {
+                const th = document.createElement('th');
+                th.className = 'week-cell';
+                th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
+                headerRow.appendChild(th);
+            }
+        }
+
+        async function takeScreenshot() {
+            const node = document.getElementById('capture-area');
+            const btn = document.getElementById('screenshotBtn');
+            node.classList.add('exporting');
+            
+            btn.innerText = "⌛ Обработка...";
+            btn.disabled = true;
+            
+            try {
+                await new Promise(r => setTimeout(r, 500));
+                const dataUrl = await window.htmlToImage.toPng(node, {
+                    pixelRatio: 2,
+                    backgroundColor: '#FEF8F2'
+                });
+                const link = document.createElement('a');
+                link.download = `HI3_Events_${new Date().toISOString().slice(0,10)}.png`;
+                link.href = dataUrl;
+                link.click();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                node.classList.remove('exporting');
+                btn.innerText = "Создать скриншот";
+                btn.disabled = false;
+            }
+        }
+
+        window.onload = async () => {
+            initHeader();
+            renderTable();
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
+        };
+        
+        window.onresize = renderBanners;
+    </script>
+</body>
+</html>
