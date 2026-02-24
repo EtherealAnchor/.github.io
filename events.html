@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #FEF8F2;
@@ -20,6 +20,11 @@
         }
         body::-webkit-scrollbar { display: none; }
         body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Гарантируем, что шрифт применяется ко всем элементам на скриншоте */
+        #capture-area, #capture-area * {
+            font-family: 'Inter', sans-serif !important;
+        }
 
         .nav-container {
             display: flex;
@@ -182,12 +187,13 @@
         .text-xs-custom { 
             font-size: 16px;
             font-style: italic; 
-            font-weight: 800; 
+            font-weight: 900;
             color: #2d0a2a;
-            opacity: 0.85; 
+            opacity: 0.9; 
             margin-top: 4px; 
             display: block;
             line-height: 1.2;
+            letter-spacing: -0.01em;
         }
         
         .controls-panel {
@@ -243,7 +249,7 @@
             { id: 2, category: "Событие 2", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
             { id: 3, category: "Событие 3", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
             { id: 4, category: "Событие 4", title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
-            { id: 5, category: "Событие 5", title: '<span class="text-lg">Весенне лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
+            { id: 5, category: "Событие 5", title: '<span class="text-lg">Весеннее лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
             { id: 6, category: "Событие 6", title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
             { id: 7, category: "Событие 7", title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 2, icon: "images/time.png" }
         ];
@@ -335,14 +341,17 @@
             btn.disabled = true;
             
             try {
-                await new Promise(r => setTimeout(r, 200));
+                await document.fonts.ready;
+                await new Promise(r => setTimeout(r, 400));
                 
                 const dataUrl = await window.htmlToImage.toPng(node, {
-                    pixelRatio: 2.5,
+                    pixelRatio: 3,
                     backgroundColor: '#594AA8',
                     cacheBust: true,
+                    fontEmbedCSS: true,
                     style: {
-                        borderRadius: '0px'
+                        borderRadius: '0px',
+                        transform: 'scale(1)',
                     }
                 });
                 
