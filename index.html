@@ -61,7 +61,7 @@
             background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
-            padding-bottom: 20px;
+            padding: 20px 10px;
         }
 
         table {
@@ -69,11 +69,11 @@
             border-collapse: collapse;
             table-layout: fixed;
             background: transparent;
-            min-width: 1200px;
+            min-width: 1300px;
         }
 
         th, td {
-            border: 3px solid transparent; 
+            border: 4px solid transparent; 
             background-clip: padding-box !important;
         }
 
@@ -90,35 +90,42 @@
 
         .category-cell {
             background: rgba(0, 0, 0, 0.4);
-            padding: 12px;
-            font-weight: 800;
+            padding: 10px;
+            font-weight: 900;
             font-size: 0.95rem;
-            border-radius: 16px;
-            width: 180px;
-            backdrop-filter: blur(4px);
-            text-align: center;
-        }
-
-        .category-cell-alt {
-            background: rgba(152, 102, 153, 0.6);
-            padding: 12px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            border-radius: 16px;
+            border-radius: 14px;
             width: 180px;
             backdrop-filter: blur(4px);
             text-align: center;
             color: #fff;
+            position: sticky;
+            left: 0;
+            z-index: 20;
+        }
+
+        .category-cell-alt {
+            background: rgba(152, 102, 153, 0.65);
+            padding: 10px;
+            font-weight: 900;
+            font-size: 0.95rem;
+            border-radius: 14px;
+            width: 180px;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            color: #fff;
+            position: sticky;
+            left: 0;
+            z-index: 20;
         }
 
         .content-cell {
             position: relative;
-            height: 90px;
+            height: 95px;
         }
 
         .supply-card {
             background: #F5E9F4;
-            height: 82px;
+            height: 86px;
             display: flex;
             align-items: center;
             position: absolute;
@@ -127,28 +134,29 @@
             z-index: 10;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
         .supply-assets {
             display: flex;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
             height: 100%;
-            padding: 4px;
+            padding: 6px;
             flex-shrink: 0;
+            background: rgba(0,0,0,0.03);
         }
 
         .mini-icons-stack {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
             justify-content: center;
         }
 
-        .mini-icon { width: 30px; height: 30px; object-fit: contain; background: #73486F; border-radius: 4px; }
-        .main-icon { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; }
-        .extra-icon { width: 170px; height: 72px; object-fit: cover; border-radius: 6px; }
+        .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 5px; }
+        .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
+        .extra-icon { width: 175px; height: 74px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -157,18 +165,18 @@
             align-items: center;
             color: #2d0a2a;
             flex: 1;
-            padding: 0 8px;
+            padding: 0 6px;
             min-width: 0;
             text-align: center;
             height: 100%;
+            overflow: hidden;
         }
 
         .text-lg, .text-ex, .text-md {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            display: block;
+            line-height: 1.0;
+            word-wrap: break-word;
             overflow: hidden;
-            line-height: 1.1;
         }
 
         .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.1rem; font-weight: 900; }
@@ -185,11 +193,12 @@
         .duration-4-plus .text-md { font-size: 1.2rem; font-weight: 800; }
 
         .text-xs { 
-            font-size: clamp(0.65rem, 1vw, 0.85rem); 
+            font-size: 0.75rem; 
             font-style: italic; 
-            font-weight: 800; 
-            opacity: 0.9;
+            font-weight: 700; 
+            opacity: 0.85;
             margin-top: 2px;
+            line-height: 1.0;
         }
 
         #loading-overlay {
@@ -237,7 +246,7 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const supplyData = {
-            "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
+            "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-xs">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
             "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
             "Экипировка А": [{ title: '<span class="text-lg">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
@@ -249,169 +258,109 @@
                 { title: '<span class="text-lg">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
                 { title: '<span class="text-lg">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
-            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов:</span><span class="text-md">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки:</span><span class="text-md">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
+            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов:</span><span class="text-xs">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
+            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки:</span><span class="text-xs">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
             "Наряд": [
                 { title: '<span class="text-ex">Изящная Луна</span><span class="text-md">9600 кристаллов</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
                 { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
             ],
         };
 
-        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-        const PROXIES = [
-            "https://corsproxy.io/?",
-            "https://api.allorigins.win/raw?url=",
-            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
-            "https://api.codetabs.com/v1/proxy?quest="
-        ];
-
         const imageCache = new Map();
+        const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url="];
+        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         async function fetchImageAsBase64(url) {
             if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
-            
             for (const proxy of PROXIES) {
                 try {
                     const response = await fetch(proxy + encodeURIComponent(url));
                     if (!response.ok) continue;
                     const blob = await response.blob();
-                    const base64 = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                    imageCache.set(url, base64);
-                    return base64;
-                } catch (e) {}
+                    const b64 = await new Promise(r => { const f = new FileReader(); f.onloadend = () => r(f.result); f.readAsDataURL(blob); });
+                    imageCache.set(url, b64);
+                    return b64;
+                } catch(e) {}
             }
             return url;
         }
 
         async function initTable() {
-            const headerRow = document.getElementById('weeksHeader');
-            const tbody = document.getElementById('tableBody');
-            
-            for (let i = 1; i <= totalWeeks; i++) {
-                const th = document.createElement('th');
-                th.className = 'week-cell';
+            const h = document.getElementById('weeksHeader');
+            const b = document.getElementById('tableBody');
+            for(let i=1; i<=totalWeeks; i++){
+                const th = document.createElement('th'); th.className = 'week-cell';
                 th.innerHTML = `<span class="week-name">НЕДЕЛЯ ${i}</span><span class="week-dates">${weekDates[i-1]}</span>`;
-                headerRow.appendChild(th);
+                h.appendChild(th);
             }
-            
-            categories.forEach((cat, index) => {
+            categories.forEach((cat, idx) => {
                 const tr = document.createElement('tr');
-                const cellClass = (index % 2 === 0) ? "category-cell" : "category-cell-alt";
-                tr.innerHTML = `<td class="${cellClass}">${cat}</td>` + 
-                    Array.from({length: totalWeeks}, (_, i) => `<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
-                tbody.appendChild(tr);
+                tr.innerHTML = `<td class="${idx%2===0?'category-cell':'category-cell-alt'}">${cat}</td>` + 
+                    Array.from({length:totalWeeks},(_,i)=>`<td class="content-cell" id="cell-${cat}-${i+1}"></td>`).join('');
+                b.appendChild(tr);
             });
 
-            const allUrls = [];
-            Object.values(supplyData).flat().forEach(item => {
-                if (item.icons.main) allUrls.push(item.icons.main);
-                if (item.icons.rank) allUrls.push(item.icons.rank);
-                if (item.icons.type) allUrls.push(item.icons.type);
-                if (item.icons.extra) allUrls.push(item.icons.extra);
+            const urls = [];
+            Object.values(supplyData).flat().forEach(v => {
+                if(v.icons.main) urls.push(v.icons.main);
+                if(v.icons.rank) urls.push(v.icons.rank);
+                if(v.icons.type) urls.push(v.icons.type);
+                if(v.icons.extra) urls.push(v.icons.extra);
             });
-
-            await Promise.all(allUrls.map(url => fetchImageAsBase64(url)));
-
+            await Promise.all(urls.map(u => fetchImageAsBase64(u)));
             document.getElementById('loading-overlay').style.opacity = '0';
             setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
-            
-            await renderBanners();
+            renderBanners();
         }
 
         async function renderBanners() {
-            document.querySelectorAll('.supply-card').forEach(el => el.remove());
-            
-            const renderPromises = categories.map(async (cat) => {
-                if (!supplyData[cat]) return;
-                
-                for (const item of supplyData[cat]) {
-                    const startCell = document.getElementById(`cell-${cat}-${item.startWeek}`);
-                    const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
-                    const endCell = document.getElementById(`cell-${cat}-${endWeekNum}`);
-                    
-                    if (startCell && endCell) {
+            document.querySelectorAll('.supply-card').forEach(e => e.remove());
+            for(const cat of categories){
+                if(!supplyData[cat]) continue;
+                for(const item of supplyData[cat]){
+                    const start = document.getElementById(`cell-${cat}-${item.startWeek}`);
+                    const endWeek = Math.min(item.startWeek + item.duration - 1, totalWeeks);
+                    const end = document.getElementById(`cell-${cat}-${endWeek}`);
+                    if(start && end){
                         const card = document.createElement('div');
-                        let durationClass = 'duration-1';
-                        if (item.duration === 2) durationClass = 'duration-2';
-                        else if (item.duration === 3) durationClass = 'duration-3';
-                        else if (item.duration >= 4) durationClass = 'duration-4-plus';
+                        let durClass = 'duration-1';
+                        if(item.duration===2) durClass='duration-2';
+                        else if(item.duration===3) durClass='duration-3';
+                        else if(item.duration>=4) durClass='duration-4-plus';
                         
-                        card.className = `supply-card ${durationClass}`;
-                        const internalPadding = 4;
-                        const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - (internalPadding * 2);
-                        card.style.width = `${width}px`;
-                        card.style.left = `${internalPadding}px`;
+                        card.className = `supply-card ${durClass}`;
+                        const pad = 4;
+                        card.style.width = `${(end.offsetLeft + end.offsetWidth) - start.offsetLeft - (pad*2)}px`;
+                        card.style.left = `${pad}px`;
 
-                        const getCached = async (url) => {
-                            if (!url) return null;
-                            if (imageCache.has(url)) return imageCache.get(url);
-                            return await fetchImageAsBase64(url);
-                        };
-
-                        let assetsHtml = '';
-                        if (item.icons.extra) {
-                            const src = await getCached(item.icons.extra);
-                            assetsHtml = `<img src="${src || EMPTY_IMG}" class="extra-icon" onerror="this.src='${EMPTY_IMG}'">`;
+                        let assets = '';
+                        if(item.icons.extra){
+                            assets = `<img src="${imageCache.get(item.icons.extra)||item.icons.extra}" class="extra-icon">`;
                         } else {
-                            const mainSrc = await getCached(item.icons.main);
-                            const rankSrc = await getCached(item.icons.rank);
-                            const typeSrc = await getCached(item.icons.type);
-
-                            const miniStack = (rankSrc || typeSrc) ? `
-                                <div class="mini-icons-stack">
-                                    ${rankSrc ? `<img src="${rankSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
-                                    ${typeSrc ? `<img src="${typeSrc}" class="mini-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}
-                                </div>
-                            ` : '';
-                            assetsHtml = `${miniStack}${mainSrc ? `<img src="${mainSrc}" class="main-icon" onerror="this.src='${EMPTY_IMG}'">` : ''}`;
+                            const stack = `<div class="mini-icons-stack">
+                                ${item.icons.rank?`<img src="${imageCache.get(item.icons.rank)||item.icons.rank}" class="mini-icon">`:''}
+                                ${item.icons.type?`<img src="${imageCache.get(item.icons.type)||item.icons.type}" class="mini-icon">`:''}
+                            </div>`;
+                            assets = `${stack}<img src="${imageCache.get(item.icons.main)||item.icons.main}" class="main-icon">`;
                         }
-                        card.innerHTML = `<div class="supply-assets">${assetsHtml}</div><div class="supply-content">${item.title}</div>`;
-                        startCell.appendChild(card);
+                        card.innerHTML = `<div class="supply-assets">${assets}</div><div class="supply-content">${item.title}</div>`;
+                        start.appendChild(card);
                     }
                 }
-            });
-
-            await Promise.all(renderPromises);
+            }
         }
 
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
-            btn.innerText = "⌛ Обработка...";
-            btn.disabled = true;
-
+            btn.innerText = "⌛ Обработка..."; btn.disabled = true;
             try {
                 await document.fonts.ready;
-                
-                const dataUrl = await window.htmlToImage.toPng(node, {
-                    pixelRatio: 2,
-                    backgroundColor: '#FEF8F2',
-                    cacheBust: false,
-                    style: { fontFamily: "'Inter', sans-serif" }
-                });
-                
+                const dataUrl = await window.htmlToImage.toPng(node, { pixelRatio: 2.5, backgroundColor: '#FEF8F2' });
                 const link = document.createElement('a');
-                link.download = `Schedule_${new Date().toISOString().slice(0,10)}.png`;
-                link.href = dataUrl;
-                link.click();
-            } catch (e) {
-                console.error("Ошибка скриншота:", e);
-                try {
-                    const dataUrlFallback = await window.htmlToImage.toPng(node, { pixelRatio: 2, skipFonts: true });
-                    const link = document.createElement('a');
-                    link.download = `Schedule_Simple_${new Date().toISOString().slice(0,10)}.png`;
-                    link.href = dataUrlFallback;
-                    link.click();
-                } catch (e2) {}
-            } finally {
-                btn.innerText = "Создать скриншот";
-                btn.disabled = false;
-            }
+                link.download = `Schedule_v8.7.png`; link.href = dataUrl; link.click();
+            } catch (e) { console.error(e); } finally { btn.innerText = "Создать скриншот"; btn.disabled = false; }
         }
 
         window.onload = initTable;
