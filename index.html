@@ -134,6 +134,7 @@
             z-index: 10;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            overflow: visible;
         }
 
         .supply-assets {
@@ -163,22 +164,23 @@
             align-items: center;
             color: #2d0a2a;
             flex: 1;
-            padding: 4px 8px;
+            padding: 6px 10px;
+            gap: 2px;
             min-width: 0;
             text-align: center;
             height: 100%;
         }
 
-        .text-lg, .text-ex, .text-md {
+        .text-lg, .text-ex, .text-md, .text-xs {
             display: block;
-            line-height: 1.2;
+            line-height: 1.15;
             word-wrap: break-word;
             white-space: normal;
         }
 
         .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.1rem; font-weight: 900; }
-        .duration-1 .text-md { font-size: 0.85rem; font-weight: 800; }
-        .duration-1 .text-xs { font-size: 0.6rem; }
+        .duration-1 .text-md { font-size: 0.95rem; font-weight: 800; }
+        .duration-1 .text-xs { font-size: 0.65rem; }
 
         .duration-2 .text-lg, .duration-2 .text-ex { font-size: 1.25rem; font-weight: 900; }
         .duration-2 .text-md { font-size: 0.85rem; font-weight: 900; }
@@ -206,7 +208,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов для скриншота...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
     </div>
 
     <nav class="nav-container">
@@ -256,9 +258,9 @@
 
         const imageCache = new Map();
         const PROXIES = [
-            "https://corsproxy.io/?",
             "https://api.allorigins.win/raw?url=",
             "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
+            "https://corsproxy.io/?",
             "https://api.codetabs.com/v1/proxy?quest="
         ];
 
@@ -368,7 +370,7 @@
                 });
                 
                 const link = document.createElement('a');
-                link.download = `Schedule_v8.7_Final.png`; 
+                link.download = `Schedule_v8.7_Fixed.png`; 
                 link.href = dataUrl; 
                 link.click();
             } catch (e) { 
