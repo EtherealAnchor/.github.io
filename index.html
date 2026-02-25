@@ -61,7 +61,7 @@
             background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
-            padding: 20px 10px;
+            padding: 25px 15px;
         }
 
         table {
@@ -120,12 +120,12 @@
 
         .content-cell {
             position: relative;
-            height: 95px;
+            height: 100px;
         }
 
         .supply-card {
             background: #F5E9F4;
-            height: 86px;
+            height: 92px;
             display: flex;
             align-items: center;
             position: absolute;
@@ -133,7 +133,6 @@
             transform: translateY(-50%);
             z-index: 10;
             border-radius: 8px;
-            overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
@@ -154,8 +153,8 @@
         }
 
         .mini-icon { width: 32px; height: 32px; object-fit: contain; background: #73486F; border-radius: 5px; }
-        .main-icon { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
-        .extra-icon { width: 175px; height: 74px; object-fit: cover; border-radius: 6px; }
+        .main-icon { width: 78px; height: 78px; object-fit: cover; border-radius: 6px; }
+        .extra-icon { width: 180px; height: 78px; object-fit: cover; border-radius: 6px; }
 
         .supply-content {
             display: flex;
@@ -164,22 +163,21 @@
             align-items: center;
             color: #2d0a2a;
             flex: 1;
-            padding: 0 6px;
+            padding: 4px 8px;
             min-width: 0;
             text-align: center;
             height: 100%;
-            overflow: hidden;
         }
 
         .text-lg, .text-ex, .text-md {
             display: block;
-            line-height: 1.1;
+            line-height: 1.2;
             word-wrap: break-word;
-            overflow: hidden;
+            white-space: normal;
         }
 
         .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.1rem; font-weight: 900; }
-        .duration-1 .text-md { font-size: 0.7rem; font-weight: 800; }
+        .duration-1 .text-md { font-size: 0.85rem; font-weight: 800; }
         .duration-1 .text-xs { font-size: 0.6rem; }
 
         .duration-2 .text-lg, .duration-2 .text-ex { font-size: 1.25rem; font-weight: 900; }
@@ -190,7 +188,6 @@
 
         .duration-4-plus .text-lg, .duration-4-plus .text-ex { font-size: 1.8rem; font-weight: 900; }
         .duration-4-plus .text-md { font-size: 1.2rem; font-weight: 800; }
-
 
         #loading-overlay {
             position: fixed;
@@ -209,7 +206,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка стилей и шрифтов...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов для скриншота...</p>
     </div>
 
     <nav class="nav-container">
@@ -264,7 +261,6 @@
             "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
             "https://api.codetabs.com/v1/proxy?quest="
         ];
-        const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         async function fetchImageAsBase64(url) {
             if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
@@ -321,8 +317,8 @@
                 if(!supplyData[cat]) continue;
                 for(const item of supplyData[cat]){
                     const start = document.getElementById(`cell-${cat}-${item.startWeek}`);
-                    const endWeek = Math.min(item.startWeek + item.duration - 1, totalWeeks);
-                    const end = document.getElementById(`cell-${cat}-${endWeek}`);
+                    const endWeekNum = Math.min(item.startWeek + item.duration - 1, totalWeeks);
+                    const end = document.getElementById(`cell-${cat}-${endWeekNum}`);
                     if(start && end){
                         const card = document.createElement('div');
                         let durClass = 'duration-1';
@@ -361,10 +357,10 @@
                 await document.fonts.ready;
                 
                 const dataUrl = await window.htmlToImage.toPng(node, { 
-                    pixelRatio: 2.5, 
+                    pixelRatio: 3, 
                     backgroundColor: '#FEF8F2',
                     fontEmbedCSS: true,
-                    cacheBust: true,
+                    skipAutoScale: true,
                     style: {
                         transform: 'scale(1)',
                         transformOrigin: 'top left'
@@ -372,7 +368,7 @@
                 });
                 
                 const link = document.createElement('a');
-                link.download = `Schedule_v8.7_${Date.now()}.png`; 
+                link.download = `Schedule_v8.7_Final.png`; 
                 link.href = dataUrl; 
                 link.click();
             } catch (e) { 
