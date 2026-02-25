@@ -144,7 +144,6 @@
             height: 100%;
             padding: 6px;
             flex-shrink: 0;
-            background: rgba(0,0,0,0.03);
         }
 
         .mini-icons-stack {
@@ -238,7 +237,7 @@
         const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
 
         const supplyData = {
-            "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-xs">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
+            "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }],
             "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
             "Экипировка А": [{ title: '<span class="text-lg">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
             "Экипировка Б": [
@@ -248,7 +247,7 @@
             "Оператор": [
                 { title: '<span class="text-lg">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
                 { title: '<span class="text-lg">Тереза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
-                { title: '<span class="text-lg">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
+                { title: '<span class="text-md">Серафим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
             ],
             "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов:</span><span class="text-md">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
             "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки:</span><span class="text-md">Корали + Хелия / Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
@@ -259,7 +258,12 @@
         };
 
         const imageCache = new Map();
-        const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url="];
+        const PROXIES = [
+            "https://corsproxy.io/?",
+            "https://api.allorigins.win/raw?url=",
+            "https://worker-cors-anywhere.etherealanchor.workers.dev/?url=",
+            "https://api.codetabs.com/v1/proxy?quest="
+        ];
         const EMPTY_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
         async function fetchImageAsBase64(url) {
@@ -359,7 +363,7 @@
                 const dataUrl = await window.htmlToImage.toPng(node, { 
                     pixelRatio: 2.5, 
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: true, // Включает CSS шрифтов в SVG
+                    fontEmbedCSS: true,
                     cacheBust: true,
                     style: {
                         transform: 'scale(1)',
