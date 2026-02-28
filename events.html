@@ -213,25 +213,10 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            eventsList.forEach((event) => {
-                const tr = document.createElement('tr');
-                let cellsHtml = `<td style="width:1px; overflow:visible;"><div class="row-controls"><button class="btn-row-del" onclick="deleteEvent(${event.id})">✕</button></div></td>`;
-                
-                for(let i=1; i<=totalWeeks; i++) {
-                    cellsHtml += `<td class="content-cell" id="cell-${event.id}-${i}"></td>`;
-                }
-                tr.innerHTML = cellsHtml;
-                tbody.appendChild(tr);
-            });
             
             requestAnimationFrame(() => {
                 renderBanners();
             });
-        }
-
-        function deleteEvent(id) {
-            eventsList = eventsList.filter(e => e.id !== id);
-            renderTable();
         }
 
         function renderBanners() {
