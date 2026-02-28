@@ -205,7 +205,7 @@
             { id: 5, title: '<span class="text-lg">Весеннее лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
             { id: 6, title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
             { id: 7, title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 6, icon: "images/time.png" },
-            { id: 8, title: '<span class="text-lg">Дебют главы 11 экстра «Ночь, искомая светом во сне»</span><span class="text-xs-custom">Получите больше наград во время события</span>', startWeek: 4, duration: 5, icon: "images/ch.png" },
+            { id: 8, title: '<span class="text-lg">Дебют главы 11 экстра</br>«Ночь, искомая светом во сне»</span><span class="text-xs-custom">Получите больше наград во время события</span>', startWeek: 4, duration: 5, icon: "images/ch.png" },
             { id: 9, title: '<span class="text-lg">Праздничное облачение</span><span class="text-xs-custom">2 коробки с нарядами на выбор, кристаллы</span>', startWeek: 5, duration: 4, icon: "images/skins.png" }
         ];
 
@@ -213,10 +213,25 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
+            eventsList.forEach((event) => {
+                const tr = document.createElement('tr');
+                let cellsHtml = `<td style="width:0px; overflow:visible;"></td>`;
+                
+                for(let i=1; i<=totalWeeks; i++) {
+                    cellsHtml += `<td class="content-cell" id="cell-${event.id}-${i}"></td>`;
+                }
+                tr.innerHTML = cellsHtml;
+                tbody.appendChild(tr);
+            });
             
             requestAnimationFrame(() => {
                 renderBanners();
             });
+        }
+
+        function deleteEvent(id) {
+            eventsList = eventsList.filter(e => e.id !== id);
+            renderTable();
         }
 
         function renderBanners() {
