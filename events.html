@@ -64,6 +64,7 @@
             background: linear-gradient(#8347a1, #594AA8);
             display: inline-block;
             min-width: 100%;
+            padding-bottom: 20px;
         }
 
         table {
@@ -118,13 +119,13 @@
 
         .content-cell {
             position: relative;
-            height: 100px;
+            height: 110px;
             border-radius: 8px;
         }
 
         .supply-card {
             background: #F5E9F4;
-            height: 90px;
+            max-height: 94px; 
             display: flex;
             align-items: center;
             position: absolute;
@@ -137,7 +138,7 @@
         }
 
         .supply-assets {
-            height: 100%;
+            align-self: stretch;
             width: 200px;
             flex-shrink: 0;
         }
@@ -150,10 +151,10 @@
             justify-content: center;
             color: #2d0a2a;
             flex: 1;
-            line-height: 1.1;
-            padding: 0 15px;
-            overflow: hidden;
+            line-height: 1.2;
+            padding: 10px 15px;
             text-align: center;
+            word-wrap: break-word; 
         }
 
         #loading-overlay {
@@ -169,21 +170,21 @@
         }
 
         .text-lg { 
-            font-size: 1.1rem; 
+            font-size: 1.05rem; 
             font-weight: 900; 
             text-transform: uppercase; 
             display: block;
+            margin-bottom: 2px;
         }
         
         .text-xs-custom { 
             font-size: 16px;
             font-style: italic; 
-            font-weight: 900;
+            font-weight: 800;
             color: #2d0a2a;
-            opacity: 0.9; 
-            margin-top: 4px; 
+            opacity: 0.95; 
             display: block;
-            line-height: 1.2;
+            line-height: 1.1;
             letter-spacing: -0.01em;
         }
         
@@ -222,8 +223,7 @@
         <div class="capture-wrapper" id="capture-area">
             <table id="supplyTable">
                 <thead>
-                    <tr id="weeksHeader">
-                    </tr>
+                    <tr id="weeksHeader"></tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -269,7 +269,6 @@
             
             eventsList.forEach((event, index) => {
                 const tr = document.createElement('tr');
-
                 tr.innerHTML = `
                     ${Array.from({length: totalWeeks}, (_, i) => {
                         const weekNum = i + 1;
@@ -318,7 +317,7 @@
 
         function initHeader() {
             const headerRow = document.getElementById('weeksHeader');
-            headerRow.innerHTML = ''; // Очистка
+            headerRow.innerHTML = '';
             for (let i = 1; i <= totalWeeks; i++) {
                 const th = document.createElement('th');
                 th.className = 'week-cell';
@@ -337,7 +336,7 @@
             
             try {
                 await document.fonts.ready;
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 600)); 
                 
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 3,
