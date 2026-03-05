@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Усиления - Elysian Realm</title>
+    <title>Усиления</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <style>
@@ -33,7 +33,7 @@
             transition: background 0.3s;
         }
 
-        .nav-button:hover {
+        .nav-button:hover, .nav-button.active {
             background: #594AA8;
         }
 
@@ -49,7 +49,7 @@
         .section-header {
             background: #c5a059;
             color: #1a1a1d;
-            padding: 4px 16px;
+            padding: 6px 16px;
             font-weight: bold;
             display: inline-flex;
             align-items: center;
@@ -102,19 +102,6 @@
             font-weight: 600;
         }
 
-        .hard-tag {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #e67e22;
-            color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 2px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
         .buff-item {
             display: flex;
             align-items: center;
@@ -150,9 +137,9 @@
         .screenshot-btn:hover { background: #6b5bc2; }
         .screenshot-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .exporting { border-radius: 0 !important; }
-        
         .text-val { color: #f1c40f; font-weight: 700; }
+        
+        .exporting .no-export { display: none; }
     </style>
 </head>
 <body>
@@ -213,28 +200,28 @@
 
         <div class="mb-10">
             <div class="section-header">
-                <img src="images/bosses.png" style="width: 40px;"">
+                <img src="images/bosses.png" style="width: 40px;">
                 Превью боссов
             </div>
             <div class="grid grid-cols-3 gap-4">
                 <div class="boss-card">
-                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0c/Frost_Emperor_%28Enemy%29_%28Icon%29.png" class="w-full h-full object-cover opacity-70" alt="Benares">
+                    <div class="w-full h-full bg-gray-800 flex items-center justify-center text-xs text-gray-500">Benares</div>
                     <div class="boss-label">Этаж 8</div>
                 </div>
                 <div class="boss-card">
-                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0c/Frost_Emperor_%28Enemy%29_%28Icon%29.png" class="w-full h-full object-cover opacity-70" alt="Hephaestus">
+                    <div class="w-full h-full bg-gray-800 flex items-center justify-center text-xs text-gray-500">Hephaestus</div>
                     <div class="boss-label">Этаж 12</div>
                 </div>
                 <div class="boss-card">
-                    <img src="https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0c/Frost_Emperor_%28Enemy%29_%28Icon%29.png" class="w-full h-full object-cover opacity-70" alt="Wolf">
-                    <div class="boss-label">Этаж</div>
+                    <div class="w-full h-full bg-gray-800 flex items-center justify-center text-xs text-gray-500">Wolf</div>
+                    <div class="boss-label">Этаж 17</div>
                 </div>
             </div>
         </div>
 
         <div>
             <div class="section-header">
-                <img src="images/buffs.png" style="width: 20px;"">
+                <img src="images/buffs.png" style="width: 20px;">
                 Усиления
             </div>
 
@@ -259,7 +246,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
                     5
                 </div>
-                <p class="flex-grow text-sm">Deployed Valkyrie deals <span class="text-val">15%</span> more Total DMG. This effect is disabled for <span class="text-val">5s</span> after taking DMG. Triggering it again resets the duration.</p>
+                <p class="flex-grow text-sm">Deployed Valkyrie deals <span class="text-val">15%</span> more Total DMG. This effect is disabled for <span class="text-val">5s</span> after taking DMG.</p>
             </div>
 
             <div class="buff-item">
@@ -267,7 +254,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
                     10
                 </div>
-                <p class="flex-grow text-sm">Casting Weapon Skill increases Elemental DMG dealt by <span class="text-val">12%</span> for <span class="text-val">12s</span>. Retriggering refreshes duration.</p>
+                <p class="flex-grow text-sm">Casting Weapon Skill increases Elemental DMG dealt by <span class="text-val">12%</span> for <span class="text-val">12s</span>.</p>
             </div>
 
             <div class="buff-item">
@@ -275,7 +262,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
                     10
                 </div>
-                <p class="flex-grow text-sm">For every support Valkyrie whose type is different from the deployed Valkyrie, the deployed Valkyrie deals <span class="text-val">8%</span> more Physical and Elemental DMG.</p>
+                <p class="flex-grow text-sm">For every support Valkyrie whose type is different, the deployed Valkyrie deals <span class="text-val">8%</span> more DMG.</p>
             </div>
 
             <div class="buff-item">
@@ -283,7 +270,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
                     15
                 </div>
-                <p class="flex-grow text-sm">After landing Ultimate or Combo ATK, the deployed Valkyrie deals <span class="text-val">30%</span> more Total DMG for <span class="text-val">15s</span>. Repeated triggers refresh the duration.</p>
+                <p class="flex-grow text-sm">After landing Ultimate or Combo ATK, the deployed Valkyrie deals <span class="text-val">30%</span> more Total DMG for <span class="text-val">15s</span>.</p>
             </div>
         </div>
     </div>
@@ -292,30 +279,49 @@
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
-            node.classList.add('exporting');
             
+            node.classList.add('exporting');
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
             
             try {
+                const images = node.getElementsByTagName('img');
+                const imagePromises = Array.from(images).map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                });
+                
+                await Promise.all(imagePromises);
                 await document.fonts.ready;
-                await new Promise(r => setTimeout(r, 400)); 
+                await new Promise(r => setTimeout(r, 500)); 
                 
                 const dataUrl = await window.htmlToImage.toPng(node, {
-                    pixelRatio: 3,
+                    pixelRatio: 2,
                     backgroundColor: '#1a1a1d',
                     cacheBust: true,
-                    style: {
-                        borderRadius: '0'
+                    filter: (element) => {
+                        return !element.classList?.contains('error-img');
                     }
                 });
                 
                 const link = document.createElement('a');
-                link.download = `ER_Buffs_Report_${Date.now()}.png`;
+                link.download = `ER_Buffs_${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error("Screenshot Error:", e);
+                console.error("Screenshot Error Details:", e);
+                try {
+                    const fallbackUrl = await window.htmlToImage.toJpeg(node, { quality: 0.8 });
+                    const link = document.createElement('a');
+                    link.download = `ER_Buffs_Fallback.jpg`;
+                    link.href = fallbackUrl;
+                    link.click();
+                } catch (err) {
+                    console.error("Critical Failure:", err);
+                }
             } finally {
                 node.classList.remove('exporting');
                 btn.innerText = "Создать скриншот";
