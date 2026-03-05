@@ -144,6 +144,7 @@
             margin: 0 !important;
             border: none !important;
             border-radius: 0 !important;
+            width: 1000px !important;
         }
     </style>
 </head>
@@ -163,7 +164,7 @@
         
         <div class="mb-10">
             <div class="section-header">
-                <img src="images/eff.png" style="width: 30px;">
+                <img src="images/eff.png" style="width: 30px;" onerror="this.style.display='none'">
                 Эффекты
             </div>
             
@@ -205,7 +206,7 @@
 
         <div class="mb-10">
             <div class="section-header">
-                <img src="images/bosses.png" style="width: 40px;"">
+                <img src="images/bosses.png" style="width: 40px;" onerror="this.style.display='none'">
                 Превью боссов
             </div>
             <div class="grid grid-cols-3 gap-4">
@@ -226,7 +227,7 @@
 
         <div>
             <div class="section-header">
-                <img src="images/buffs.png" style="width: 20px;"">
+                <img src="images/buffs.png" style="width: 20px;" onerror="this.style.display='none'">
                 Усиления
             </div>
 
@@ -286,62 +287,57 @@
             const btn = document.getElementById('screenshotBtn');
             const nav = document.querySelector('.nav-container');
             
-            node.classList.add('exporting');
             nav.style.display = 'none';
-            btn.innerText = "⌛ Ожидайте...";
+            btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
+            node.classList.add('exporting');
             
             try {
+                await document.fonts.ready;
                 const images = Array.from(node.getElementsByTagName('img'));
                 
-                const checkCORS = async (img) => {
-                    try {
-                        const res = await fetch(img.src, { mode: 'cors', cache: 'no-cache' });
-                        return true;
-                    } catch (e) {
-                        return false;
+                await Promise.all(images.map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                }));
+
+                await new Promise(r => setTimeout(r, 400));
+
+                const options = {
+                    quality: 0.95,
+                    pixelRatio: 2,
+                    backgroundColor: '#1a1a1d',
+                    cacheBust: true,
+                    width: node.offsetWidth,
+                    height: node.offsetHeight,
+                    style: {
+                        transform: 'none',
+                        margin: '0',
+                        left: '0',
+                        top: '0'
                     }
                 };
 
-                const corsResults = await Promise.all(images.map(img => checkCORS(img)));
-                const safeImages = new Set();
-                images.forEach((img, i) => { if(corsResults[i]) safeImages.add(img); });
-
-                await document.fonts.ready;
-                await new Promise(r => setTimeout(r, 600)); 
-
-                const options = {
-                    pixelRatio: 2,
-                    backgroundColor: '#1a1a1d',
-                    width: node.scrollWidth,
-                    height: node.scrollHeight,
-                    skipAutoScale: true,
-                    filter: (el) => {
-                        if (el.tagName === 'IMG' && !safeImages.has(el)) {
-                            console.warn("Skipping image due to CORS restrictions:", el.src);
-                            return false; 
-                        }
-                        return true;
-                    },
-                    style: { transform: 'none', margin: '0', left: '0', top: '0' }
-                };
-
-                const dataUrl = await window.htmlToImage.toPng(node, options);
+                const dataUrl = await window.htmlToImage.toJpeg(node, options);
                 
                 const link = document.createElement('a');
-                link.download = `ER_Buffs_${Date.now()}.png`;
+                link.download = `Buffs_${new Date().getTime()}.jpg`;
                 link.href = dataUrl;
                 link.click();
+
             } catch (e) {
-                console.error("Critical Failure:", e);
+                console.error("Ошибка захвата:", e);
                 try {
-                    const svgData = await window.htmlToImage.toSvg(node);
+                    const pngUrl = await window.htmlToImage.toPng(node, { pixelRatio: 1.5 });
                     const link = document.createElement('a');
-                    link.download = `ER_Buffs_Vector.svg`;
-                    link.href = svgData;
+                    link.download = `Buffs.png`;
+                    link.href = pngUrl;
                     link.click();
-                } catch(err2) {
-                    alert("Ошибка: Не удалось создать скриншот из-за ограничений безопасности браузера.");
+                } catch (err) {
+                    alert("Не удалось создать скриншот. Попробуйте обновить страницу.");
                 }
             } finally {
                 node.classList.remove('exporting');
