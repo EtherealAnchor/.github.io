@@ -292,25 +292,38 @@
             btn.disabled = true;
             
             try {
+                const images = Array.from(node.getElementsByTagName('img'));
+                const loadPromises = images.map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                });
+
+                await Promise.all(loadPromises);
                 await document.fonts.ready;
                 
-                await new Promise(r => setTimeout(r, 300)); 
+                await new Promise(r => setTimeout(r, 600)); 
 
                 const width = node.scrollWidth;
                 const height = node.scrollHeight;
 
-                const dataUrl = await window.htmlToImage.toPng(node, {
+                const options = {
                     pixelRatio: 2,
                     backgroundColor: '#1a1a1d',
                     width: width,
                     height: height,
+                    skipAutoScale: true,
                     style: {
                         transform: 'none',
                         margin: '0',
                         left: '0',
                         top: '0'
                     }
-                });
+                };
+
+                const dataUrl = await window.htmlToImage.toPng(node, options);
                 
                 const link = document.createElement('a');
                 link.download = `ER_Buffs_${Date.now()}.png`;
@@ -319,9 +332,9 @@
             } catch (e) {
                 console.error("Screenshot Error Details:", e);
                 try {
-                    const fallbackUrl = await window.htmlToImage.toJpeg(node, { quality: 0.95 });
+                    const fallbackUrl = await window.htmlToImage.toJpeg(node, { quality: 0.9 });
                     const link = document.createElement('a');
-                    link.download = `ER_Buffs.jpg`;
+                    link.download = `ER_Buffs_Fallback.jpg`;
                     link.href = fallbackUrl;
                     link.click();
                 } catch (err) {
