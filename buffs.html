@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Усиления - Elysian Realm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap');
+
+        body {
+            background-color: #1a1a1d;
+            color: #e2e2e2;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .nav-container {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            justify-content: center;
+            background: #25252b;
+            border-bottom: 2px solid #3d3d45;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: #3d3d45;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-button:hover {
+            background: #594AA8;
+        }
+
+        .capture-area {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: #1e1e24;
+            padding: 24px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+
+        .section-header {
+            background: #c5a059;
+            color: #1a1a1d;
+            padding: 4px 16px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            clip-path: polygon(0 0, 92% 0, 100% 100%, 0% 100%);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .effect-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 6px;
+            padding: 10px 16px;
+            border-left: 4px solid transparent;
+        }
+
+        .effect-row.warning { border-left-color: #ff6b6b; }
+        .effect-row.buff { border-left-color: #4dabf7; }
+
+        .icon-container {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+
+        .boss-card {
+            background: #111116;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            aspect-ratio: 16/7;
+        }
+
+        .boss-label {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            font-weight: 600;
+        }
+
+        .hard-tag {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e67e22;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .buff-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255,255,255,0.04);
+            margin-bottom: 5px;
+            padding: 12px 18px;
+            border-radius: 2px;
+        }
+
+        .buff-value-box {
+            min-width: 50px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #4dabf7;
+        }
+
+        .screenshot-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 28px;
+            background: #594AA8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .screenshot-btn:hover { background: #6b5bc2; }
+        .screenshot-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .exporting { border-radius: 0 !important; }
+        
+        .text-val { color: #f1c40f; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-container">
+        <a href="index.html" class="nav-button">Расписание</a>
+        <a href="events.html" class="nav-button">События</a>
+        <a href="er.html" class="nav-button">Элизиум</a>
+        <a href="enemies.html" class="nav-button">Боссы</a>
+        <a href="buffs.html" class="nav-button active">Усиления</a>
+    </nav>
+
+    <button id="screenshotBtn" class="screenshot-btn" onclick="takeScreenshot()">Создать скриншот</button>
+
+    <div id="capture-area" class="capture-area">
+        
+        <div class="mb-10">
+            <div class="section-header">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>
+                Эффекты
+            </div>
+            
+            <div class="effect-row warning">
+                <div class="icon-container text-red-500">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.3H3.73L12 5.45zM11 16h2v2h-2v-2zm0-7h2v5h-2V9z"/></svg>
+                </div>
+                <p class="text-sm">Creates a spectral painted entity upon entering a floor. If the deployed character is in the painted area centered around it, she deals <span class="text-val">30%</span> more Total DMG. She then triggers a paint explosion that paints enemies with all unlocked colors: they take <span class="text-val">6%</span> less DMG initially and <span class="text-val">1.8%</span> less DMG for every floor cleared, up to <span class="text-val">33%</span> (independent).</p>
+            </div>
+
+            <div class="effect-row warning">
+                <div class="icon-container text-red-500">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.3H3.73L12 5.45zM11 16h2v2h-2v-2zm0-7h2v5h-2V9z"/></svg>
+                </div>
+                <p class="text-sm">Enemies gain a <span class="text-val">30%</span> Total DMG reduction. This effect is disabled for <span class="text-val">10s</span> after the deployed Valkyrie deals melee DMG or Weapon Skill DMG to them (repeated triggers refresh the duration; independent).</p>
+            </div>
+
+            <div class="effect-row buff">
+                <div class="icon-container text-blue-400">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                </div>
+                <p class="text-sm">Each time Combo or Charged ATK deals damage, dye nearby enemies black. Such enemies take <span class="text-val">30%</span> more damage for <span class="text-val">8s</span> (independent).</p>
+            </div>
+
+            <div class="effect-row buff">
+                <div class="icon-container text-blue-400">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                </div>
+                <p class="text-sm">After dealing DMG to enemies with Ultimate or Combo ATK, the deployed Valkyrie deals <span class="text-val">25%</span> more Physical DMG and Elemental DMG for <span class="text-val">12s</span>. Repeated triggers refresh the duration.</p>
+            </div>
+
+            <div class="effect-row buff">
+                <div class="icon-container text-blue-400">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                </div>
+                <p class="text-sm">When receiving a Normal Signet of Decimation or Vicissitude, its level is boosted by <span class="text-val">2</span>.</p>
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <div class="section-header">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                Превью боссов
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="boss-card">
+                    <img src="https://via.placeholder.com/320x140/222/555?text=Benares" class="w-full h-full object-cover opacity-70" alt="Benares">
+                    <div class="boss-label">Этаж 8</div>
+                </div>
+                <div class="boss-card">
+                    <img src="https://via.placeholder.com/320x140/222/555?text=Hephaestus" class="w-full h-full object-cover opacity-70" alt="Hephaestus">
+                    <div class="boss-label">Этаж 12</div>
+                </div>
+                <div class="boss-card">
+                    <img src="https://via.placeholder.com/320x140/222/555?text=Wolf" class="w-full h-full object-cover opacity-70" alt="Wolf">
+                    <div class="boss-label">Этаж</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-header">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13 10V3L4 14H11V21L20 10H13Z"/></svg>
+                Усиления
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    0
+                </div>
+                <p class="flex-grow text-sm">Enemies on <span class="font-bold">17F</span> will be replaced with IMG-type enemy <span class="text-blue-300">HoD Minion</span>.</p>
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    5
+                </div>
+                <p class="flex-grow text-sm">Max SP increases by <span class="text-val">30</span>.</p>
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    5
+                </div>
+                <p class="flex-grow text-sm">Deployed Valkyrie deals <span class="text-val">15%</span> more Total DMG. This effect is disabled for <span class="text-val">5s</span> after taking DMG. Triggering it again resets the duration.</p>
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    10
+                </div>
+                <p class="flex-grow text-sm">Casting Weapon Skill increases Elemental DMG dealt by <span class="text-val">12%</span> for <span class="text-val">12s</span>. Retriggering refreshes duration.</p>
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    10
+                </div>
+                <p class="flex-grow text-sm">For every support Valkyrie whose type is different from the deployed Valkyrie, the deployed Valkyrie deals <span class="text-val">8%</span> more Physical and Elemental DMG.</p>
+            </div>
+
+            <div class="buff-item">
+                <div class="buff-value-box">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+                    15
+                </div>
+                <p class="flex-grow text-sm">After landing Ultimate or Combo ATK, the deployed Valkyrie deals <span class="text-val">30%</span> more Total DMG for <span class="text-val">15s</span>. Repeated triggers refresh the duration.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function takeScreenshot() {
+            const node = document.getElementById('capture-area');
+            const btn = document.getElementById('screenshotBtn');
+            node.classList.add('exporting');
+            
+            btn.innerText = "⌛ Сохранение...";
+            btn.disabled = true;
+            
+            try {
+                await document.fonts.ready;
+                await new Promise(r => setTimeout(r, 400)); 
+                
+                const dataUrl = await window.htmlToImage.toPng(node, {
+                    pixelRatio: 3,
+                    backgroundColor: '#1a1a1d',
+                    cacheBust: true,
+                    style: {
+                        borderRadius: '0'
+                    }
+                });
+                
+                const link = document.createElement('a');
+                link.download = `ER_Buffs_Report_${Date.now()}.png`;
+                link.href = dataUrl;
+                link.click();
+            } catch (e) {
+                console.error("Screenshot Error:", e);
+            } finally {
+                node.classList.remove('exporting');
+                btn.innerText = "Создать скриншот";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
