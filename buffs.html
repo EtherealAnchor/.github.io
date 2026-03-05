@@ -293,34 +293,37 @@
             
             try {
                 const images = Array.from(node.getElementsByTagName('img'));
-                const loadPromises = images.map(img => {
-                    if (img.complete) return Promise.resolve();
-                    return new Promise(resolve => {
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                    });
-                });
-
-                await Promise.all(loadPromises);
-                await document.fonts.ready;
                 
-                await new Promise(r => setTimeout(r, 600)); 
+                const checkCORS = async (img) => {
+                    try {
+                        const res = await fetch(img.src, { mode: 'cors', cache: 'no-cache' });
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                };
 
-                const width = node.scrollWidth;
-                const height = node.scrollHeight;
+                const corsResults = await Promise.all(images.map(img => checkCORS(img)));
+                const safeImages = new Set();
+                images.forEach((img, i) => { if(corsResults[i]) safeImages.add(img); });
+
+                await document.fonts.ready;
+                await new Promise(r => setTimeout(r, 600)); 
 
                 const options = {
                     pixelRatio: 2,
                     backgroundColor: '#1a1a1d',
-                    width: width,
-                    height: height,
+                    width: node.scrollWidth,
+                    height: node.scrollHeight,
                     skipAutoScale: true,
-                    style: {
-                        transform: 'none',
-                        margin: '0',
-                        left: '0',
-                        top: '0'
-                    }
+                    filter: (el) => {
+                        if (el.tagName === 'IMG' && !safeImages.has(el)) {
+                            console.warn("Skipping image due to CORS restrictions:", el.src);
+                            return false; 
+                        }
+                        return true;
+                    },
+                    style: { transform: 'none', margin: '0', left: '0', top: '0' }
                 };
 
                 const dataUrl = await window.htmlToImage.toPng(node, options);
@@ -330,15 +333,15 @@
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
-                console.error("Screenshot Error Details:", e);
+                console.error("Critical Failure:", e);
                 try {
-                    const fallbackUrl = await window.htmlToImage.toJpeg(node, { quality: 0.9 });
+                    const svgData = await window.htmlToImage.toSvg(node);
                     const link = document.createElement('a');
-                    link.download = `ER_Buffs_Fallback.jpg`;
-                    link.href = fallbackUrl;
+                    link.download = `ER_Buffs_Vector.svg`;
+                    link.href = svgData;
                     link.click();
-                } catch (err) {
-                    console.error("Critical Failure:", err);
+                } catch(err2) {
+                    alert("Ошибка: Не удалось создать скриншот из-за ограничений безопасности браузера.");
                 }
             } finally {
                 node.classList.remove('exporting');
