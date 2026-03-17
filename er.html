@@ -212,7 +212,7 @@
         <a href="index.html" class="nav-button">Расписание</a>
         <a href="events.html" class="nav-button">События</a>
         <a href="enemies.html" class="nav-button">Боссы</a>
-        <a href="er.html" class="nav-button active">Царство Элизиума</a>
+        <a href="er.html" class="nav-button active">Элизий Прошлого</a>
         <a href="buffs.html" class="nav-button">Усиления</a>
     </nav>
 
@@ -238,6 +238,8 @@
                 <div class="card-title" contenteditable="true">Эксклюзивное усиление</div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Sleight</div> <span class="tag" contenteditable="true">С</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Facade</div> <span class="tag" contenteditable="true">С</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Reversal</div> <span class="tag" contenteditable="true">Н</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Reversal</div> <span class="tag" contenteditable="true">Н</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Blessing of Reversal</div> <span class="tag" contenteditable="true">Н</span></div>
             </div>
 
@@ -289,6 +291,8 @@
             <div class="card">
                 <div class="card-title" contenteditable="true">Вилл-Ви II</div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Act II: Pendulum</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Act II: Pendulum</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Act II: Pendulum</div> <span class="tag" contenteditable="true">О</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Act III: Conflict</div> <span class="tag" contenteditable="true">О</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Intermezzo</div> <span class="tag" contenteditable="true">ЯДРО</span></div>
             </div>
@@ -332,7 +336,10 @@
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
-                <div class="card-title" contenteditable="true">Новый Набор</div>
+                <div class="card-title" contenteditable="true">Плейсхолдер</div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Эффект</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Эффект</div> <span class="tag" contenteditable="true">О</span></div>
+                <div class="buff-row"><div class="buff-name" contenteditable="true">Эффект</div> <span class="tag" contenteditable="true">О</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Эффект</div> <span class="tag" contenteditable="true">О</span></div>
                 <div class="buff-row"><div class="buff-name" contenteditable="true">Ядро</div> <span class="tag" contenteditable="true">ЯДРО</span></div>
             `;
@@ -380,7 +387,7 @@
                 });
 
                 const link = document.createElement('a');
-                link.download = `ER_Build_${Date.now()}.png`;
+                link.download = `ER_Build.png`;
                 link.href = dataUrl;
                 link.click();
                 
