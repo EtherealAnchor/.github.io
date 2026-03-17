@@ -176,19 +176,22 @@
             align-items: center;
             color: #2d0a2a;
             flex: 1;
-            padding: 0 12px;
+            padding: 0 8px;
             min-width: 0;
             text-align: center;
             height: 100%;
-            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .text-lg, .text-ex, .text-md, .text-xs {
             display: block;
-            line-height: 1.3 !important;
-            white-space: nowrap;
+            line-height: 1.2 !important;
+            white-space: normal;
+            word-wrap: break-word;
             margin: 0 auto;
+            max-width: 100%;
         }
+        
         .duration-1 .text-lg, .duration-1 .text-ex { font-size: 1.1rem; font-weight: 900; }
         .duration-1 .text-md { font-size: 0.9rem; font-weight: 1000; margin-top: 2px; }
         .duration-1 .text-xs { font-size: 0.6rem; }
@@ -255,25 +258,27 @@
                 totalWeeks: 8,
                 weekDates: ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"],
                 data: {
-                    "Боевой костюм А": [{ title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } },
-                                       { title: '<span class="text-lg">Изящная шпионка</span>', startWeek: 7, duration: 2, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/11/21/50494840/77058b25eef2542a574686cbf3ec579a_8114043853921960195.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/bf/Lightning_DMG_%28Icon%29.png" } }],
-            "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний</br>любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
-            "Экипировка А": [{ title: '<span class="text-lg">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
-            "Экипировка Б": [
-                { title: '<span class="text-md">Экипировка для Привет♪ Фея</br>желаний любви♥️</span>', startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
-                { title: '<span class="text-lg">Новая экипировка Луны</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
-            ],
-            "Оператор": [
-                { title: '<span class="text-lg">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
-                { title: '<span class="text-md">Те-<br>реза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
-                { title: '<span class="text-md">Сера-<br>фим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
-            ],
-            "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов:</span><span class="text-md">Корали + Хелия /</br>Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
-            "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки:</span><span class="text-md">Корали + Хелия /</br>Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
-            "Наряд": [
-                { title: '<span class="text-ex">Изящная Луна</span><span class="text-md">9600 кристаллов</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
-                { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
-            ],
+                    "Боевой костюм А": [
+                        { title: '<span class="text-lg">Клинок усмирения: Рассвет</span><span class="text-md">50% скидка на первые 10 круток</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/29/4976467/e7103c47fb42ab29299ba055bb9f6190_932287349701186134.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } },
+                        { title: '<span class="text-lg">Изящная шпионка</span>', startWeek: 7, duration: 2, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/11/21/50494840/77058b25eef2542a574686cbf3ec579a_8114043853921960195.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/bf/Lightning_DMG_%28Icon%29.png" } }
+                    ],
+                    "Боевой костюм Б": [{ title: '<span class="text-lg">Привет♪ Фея желаний</br>любви♥️</span>', startWeek: 4, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/4976467/0a93ed5af5cc9eac72ff61ee61106bd4_4448111900385545924.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png" } }],
+                    "Экипировка А": [{ title: '<span class="text-lg">Экипировка для Клинка усмирения: Рассвет</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/4bc526bcf9a3e26481068c8ca3c36f1e_2503698169505797828.png"} }],
+                    "Экипировка Б": [
+                        { title: '<span class="text-md">Экипировка для Привет♪ Фея</br>желаний любви♥️</span>', startWeek: 4, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2025/09/06/50494840/7084c24f9a180d4134dfdbbcedb0e519_2837778973542954242.png"} },
+                        { title: '<span class="text-lg">Новая экипировка Луны</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
+                    ],
+                    "Оператор": [
+                        { title: '<span class="text-lg">Ченьсюэ</span>', startWeek: 1, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/0f/Chenxue_%28Icon%29.png" } },
+                        { title: '<span class="text-md">Те-<br>реза</span>', startWeek: 3, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b2/Theresa_Apocalypse_%28AstralOp%29_%28Icon%29.png" } },
+                        { title: '<span class="text-md">Сера-<br>фим</span>', startWeek: 4, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Serapeum_%28Icon%29.png" } }
+                    ],
+                    "Карнавал А": [{ title: '<span class="text-md">Ротация боевых костюмов:</span><span class="text-md">Корали + Хелия /</br>Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/rot.png" } }],
+                    "Карнавал Б": [{ title: '<span class="text-md">Ротация экипировки:</span><span class="text-md">Корали + Хелия /</br>Киана + Вита</span>', startWeek: 2, duration: 3, icons: { extra: "images/weaprot.png" } }],
+                    "Наряд": [
+                        { title: '<span class="text-ex">Изящная Луна</span><span class="text-md">9600 кристаллов</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
+                        { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
+                    ],
                 }
             },
             2: {
