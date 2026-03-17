@@ -293,7 +293,7 @@
 
         let currentVersion = 1;
         const imageCache = new Map();
-        const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url="];
+        const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url=", "https://api.codetabs.com/v1/proxy?quest="];
 
         async function fetchImageAsBase64(url) {
             if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
