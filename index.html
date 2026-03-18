@@ -235,7 +235,7 @@
 
     <div id="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-pink-500 mb-4"></div>
-        <p class="text-white font-bold" id="loading-text">Загрузка ресурсов...</p>
+        <p class="text-white font-bold" id="loading-text">Загрузка...</p>
     </div>
 
     <nav class="nav-container">
@@ -261,7 +261,7 @@
     </div>
 
     <script>
-        const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б"];
+        const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Карнавал А", "Карнавал Б", "Вознесение Валькирии", "Вознесение экипировки"];
 
         const configs = {
             1: {
@@ -293,6 +293,12 @@
                         { title: '<span class="text-ex">Изящная Луна</span><span class="text-md">9600 кристаллов</span>', startWeek: 2, duration: 3, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/main/images/cnEly.png" } },
                         { title: '<span class="text-ex">Молитвы зимы</span>', startWeek: 5, duration: 2, icons: {main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png"} }
                     ],
+                    "Вознесение Валькирии": [
+                        { title: '<span class="text-md">Пробивающая Света</span>', startWeek: 7, duration: 2, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2024/12/02/76321978/b70bfffa63563d13506099402af97f2e_2784125108544130254.png", rank: "images/Valkyries_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png"} }
+                        ],
+                    "Вознесение экипировки": [
+                        { title: '<span class="text-md">Экипировка Пробивающей Света</span>', startWeek: 7, duration: 2, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2024/11/30/50494840/94e51931f312c1ccf6b4ad17aee01b8d_7618638875560602605.png"} }
+                        ],
                 }
             },
             2: {
