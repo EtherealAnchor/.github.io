@@ -195,7 +195,7 @@
 
     <script>
         const totalWeeks = 8;
-        const weekDates = ["30 апр - 7 мая", "7-14 мая", "14-21 мая", "21-28 мая", "28 мая - 4 июн", "4-11 июня", "11-18 июня", "18-25 июня"],
+        const weekDates = ["30 апр - 7 мая", "7-14 мая", "14-21 мая", "21-28 мая", "28 мая - 4 июн", "4-11 июня", "11-18 июня", "18-25 июня"];
 
         let eventsList = [
             { id: 1, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 4, icon: "images/login2.png" }
@@ -227,7 +227,6 @@
         }
 
         function renderBanners() {
-
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
             
             for (const event of eventsList) {
@@ -239,10 +238,8 @@
                     const card = document.createElement('div');
                     card.className = 'supply-card';
                     
-                    
                     const rectStart = startCell.getBoundingClientRect();
                     const rectEnd = endCell.getBoundingClientRect();
-                    
                     
                     const left = 4;
                     const width = (rectEnd.right - rectStart.left) - 8;
@@ -275,7 +272,6 @@
         async function takeScreenshot() {
             const node = document.getElementById('capture-area');
             const btn = document.getElementById('screenshotBtn');
-            node.classList.add('exporting');
             
             btn.innerText = "⌛ Сохранение...";
             btn.disabled = true;
@@ -288,20 +284,16 @@
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 3,
                     backgroundColor: '#594AA8',
-                    cacheBust: true,
-                    style: {
-                        borderRadius: '0'
-                    }
+                    cacheBust: true
                 });
                 
                 const link = document.createElement('a');
-                link.download = `Events_Schedule_${Date.now()}.png`;
+                link.download = `Events_Schedule.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (e) {
                 console.error("Screenshot Error:", e);
             } finally {
-                node.classList.remove('exporting');
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
             }
