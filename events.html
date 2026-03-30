@@ -195,19 +195,10 @@
 
     <script>
         const totalWeeks = 8;
-        const weekDates = ["5-13 марта", "13-20 марта", "20-27 марта", "27 марта - 3 апр", "3-10 апреля", "10-17 апреля", "17-24 апреля", "24-30 апреля"];
+        const weekDates = ["30 апр - 7 мая", "7-14 мая", "14-21 мая", "21-28 мая", "28 мая - 4 июн", "4-11 июня", "11-18 июня", "18-25 июня"],
 
         let eventsList = [
-            { id: 1, title: '<span class="text-lg">Основное событие на трату кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
-            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">10 круток в экипировку, стигмата на выбор для новой Мэй и Луны</span>', startWeek: 1, duration: 8, icon: "images/login.png" },
-            { id: 3, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
-            { id: 4, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">S ранг на выбор (до HoTr), 5 круток в боевой костюм, рамка, 288 кристаллов</span>', startWeek: 2, duration: 8, icon: "images/login3.png" },
-            { id: 5, title: '<span class="text-lg">Весеннее лобби</span>', startWeek: 2, duration: 8, icon: "images/lobby.png" },
-            { id: 6, title: '<span class="text-lg">Событие версии: «Самое время: Канун Нового года»</span>', startWeek: 2, duration: 8, icon: "images/main.png" },
-            { id: 7, title: '<span class="text-lg">Капсула времени</span>', startWeek: 1, duration: 6, icon: "images/time.png" },
-            { id: 8, title: '<span class="text-lg">Дебют главы 11 экстра</br>«Ночь, искомая светом во сне»</span><span class="text-xs-custom">Получите больше наград во время события</span>', startWeek: 4, duration: 5, icon: "images/ch.png" },
-            { id: 9, title: '<span class="text-lg">Праздничное облачение</span><span class="text-xs-custom">2 коробки с нарядами на выбор, кристаллы</span>', startWeek: 5, duration: 4, icon: "images/skins.png" },
-            { id: 10, title: '<span class="text-lg">Путеводитель по выпуску из Академии Св. Фреи</span><span class="text-xs-custom">Реран</span>', startWeek: 5, duration: 4, icon: "images/class.png" }
+            { id: 1, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">5 круток в боевой костюм и 1 карта улучшения призм стигматы</span>', startWeek: 1, duration: 4, icon: "images/login2.png" },
         ];
 
         function renderTable() {
