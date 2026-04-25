@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание событий</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -287,11 +287,14 @@
                 await document.fonts.ready;
                 await new Promise(r => setTimeout(r, 400)); 
                 
-                const dataUrl = await window.htmlToImage.toPng(node, {
-                    pixelRatio: 3,
+                const canvas = await html2canvas(node, {
+                    scale: 3, // Высокое качество (пиксельное соотношение)
                     backgroundColor: '#594AA8',
-                    cacheBust: true
+                    useCORS: true,
+                    logging: false
                 });
+                
+                const dataUrl = canvas.toDataURL("image/png");
                 
                 const link = document.createElement('a');
                 link.download = `Events_Schedule.png`;
@@ -299,6 +302,7 @@
                 link.click();
             } catch (e) {
                 console.error("Screenshot Error:", e);
+                alert("Ошибка при создании скриншота. Проверьте консоль для деталей.");
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
