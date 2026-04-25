@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание событий</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="module">
+        import * as htmlToImage from 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm';
+        window.htmlToImage = htmlToImage;
+    </script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -287,14 +291,15 @@
                 await document.fonts.ready;
                 await new Promise(r => setTimeout(r, 400)); 
                 
-                const canvas = await html2canvas(node, {
-                    scale: 3, // Высокое качество (пиксельное соотношение)
+                if (!window.htmlToImage) {
+                    throw new Error("Библиотека html-to-image еще не загружена. Попробуйте нажать еще раз через пару секунд.");
+                }
+
+                const dataUrl = await window.htmlToImage.toPng(node, {
+                    pixelRatio: 3,
                     backgroundColor: '#594AA8',
-                    useCORS: true,
-                    logging: false
+                    cacheBust: true
                 });
-                
-                const dataUrl = canvas.toDataURL("image/png");
                 
                 const link = document.createElement('a');
                 link.download = `Events_Schedule.png`;
@@ -302,7 +307,7 @@
                 link.click();
             } catch (e) {
                 console.error("Screenshot Error:", e);
-                alert("Ошибка при создании скриншота. Проверьте консоль для деталей.");
+                alert("Ошибка при создании скриншота: " + e.message);
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
