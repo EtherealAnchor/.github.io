@@ -211,7 +211,7 @@
             { id: 7, title: '<span class="text-lg">Усиленный дуэт</span>', startWeek: 7, duration: 2, icon: "images/duo.png" }
         ];
 
-        function renderTable() {
+       function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
@@ -291,10 +291,6 @@
                 await document.fonts.ready;
                 await new Promise(r => setTimeout(r, 400)); 
                 
-                if (!window.htmlToImage) {
-                    throw new Error("Библиотека html-to-image еще не загружена. Попробуйте нажать еще раз через пару секунд.");
-                }
-
                 const dataUrl = await window.htmlToImage.toPng(node, {
                     pixelRatio: 3,
                     backgroundColor: '#594AA8',
@@ -307,7 +303,6 @@
                 link.click();
             } catch (e) {
                 console.error("Screenshot Error:", e);
-                alert("Ошибка при создании скриншота: " + e.message);
             } finally {
                 btn.innerText = "Создать скриншот";
                 btn.disabled = false;
