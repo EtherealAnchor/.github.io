@@ -333,8 +333,24 @@
         const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url=", "https://api.codetabs.com/v1/proxy?quest="];
 
         async function fetchImageAsBase64(url) {
-            if (!url || url.startsWith('data:') || url.startsWith('images/')) return url;
+            if (!url || url.startsWith('data:')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
+
+            // Если путь локальный (не начинается с http), загружаем напрямую
+            if (!url.startsWith('http')) {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const b64 = await new Promise(r => { const f = new FileReader(); f.onloadend = () => r(f.result); f.readAsDataURL(blob); });
+                    imageCache.set(url, b64);
+                    return b64;
+                } catch(e) {
+                    console.warn("Не удалось конвертировать локальную картинку:", url);
+                    return url;
+                }
+            }
+
+            // Если ссылка внешняя, используем прокси
             for (const proxy of PROXIES) {
                 try {
                     const response = await fetch(proxy + encodeURIComponent(url));
@@ -399,6 +415,11 @@
 
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
 
+            // Прозрачный 1x1 пиксель (Base64) в качестве фолбэка для сломанных картинок
+            const fallbackImg = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            // Обработчик ошибки: если картинка не загружается (например, нет папки images/), подставляем заглушку
+            const onErrorAttr = `onerror="this.onerror=null; this.src='${fallbackImg}';"`;
+
             for(const cat of categories){
                 if(!data[cat]) continue;
                 for(const item of data[cat]){
@@ -421,17 +442,17 @@
                         let assets = '';
                         if(item.icons.extra){
                             const iconUrl = imageCache.get(item.icons.extra) || item.icons.extra;
-                            assets = `<img src="${iconUrl}" class="extra-icon">`;
+                            assets = `<img src="${iconUrl}" class="extra-icon" ${onErrorAttr}>`;
                         } else {
                             const rankUrl = imageCache.get(item.icons.rank) || item.icons.rank;
                             const typeUrl = imageCache.get(item.icons.type) || item.icons.type;
                             const mainUrl = imageCache.get(item.icons.main) || item.icons.main;
 
                             const stack = `<div class="mini-icons-stack">
-                                ${item.icons.rank?`<img src="${rankUrl}" class="mini-icon">`:''}
-                                ${item.icons.type?`<img src="${typeUrl}" class="mini-icon">`:''}
+                                ${item.icons.rank?`<img src="${rankUrl}" class="mini-icon" ${onErrorAttr}>`:''}
+                                ${item.icons.type?`<img src="${typeUrl}" class="mini-icon" ${onErrorAttr}>`:''}
                             </div>`;
-                            assets = `${stack}<img src="${mainUrl}" class="main-icon">`;
+                            assets = `${stack}<img src="${mainUrl}" class="main-icon" ${onErrorAttr}>`;
                         }
                         card.innerHTML = `
                             <div class="supply-assets">${assets}</div>
@@ -461,7 +482,12 @@
                 link.download = `Schedule_v${currentVersion}.png`; 
                 link.href = dataUrl; 
                 link.click();
-            } catch (e) { console.error(e); } finally { btn.innerText = "Создать скриншот"; btn.disabled = false; }
+            } catch (e) { 
+                console.error(e); 
+            } finally { 
+                btn.innerText = "Создать скриншот"; 
+                btn.disabled = false; 
+            }
         }
 
         window.onload = async () => {
