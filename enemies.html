@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Боссы</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
@@ -660,6 +659,10 @@
             btn.disabled = true;
 
             try {
+                if (!window.htmlToImage) {
+                    window.htmlToImage = await import('https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/+esm');
+                }
+
                 node.classList.add('exporting');
                 await new Promise(r => setTimeout(r, 400));
 
