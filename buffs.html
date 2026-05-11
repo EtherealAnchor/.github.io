@@ -344,7 +344,7 @@
             } catch (e) {
                 console.error("Ошибка захвата:", e);
                 try {
-                    const pngUrl = await window.htmlToImage.toPng(node, { pixelRatio: 1.5 });
+                    const dataUrl = await window.htmlToImage.toPng(node, {  pixelRatio: 1.5 });
                     const link = document.createElement('a');
                     link.download = `Buffs.png`;
                     link.href = pngUrl;
