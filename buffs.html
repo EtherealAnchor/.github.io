@@ -334,10 +334,10 @@
                     }
                 };
 
-                const dataUrl = await window.htmlToImage.toJpeg(node, options);
+                const dataUrl = await window.htmlToImage.toPng(node, options);
                 
                 const link = document.createElement('a');
-                link.download = `Buffs_${new Date().getTime()}.jpg`;
+                link.download = `Buffs_${new Date().getTime()}.png`;
                 link.href = dataUrl;
                 link.click();
 
