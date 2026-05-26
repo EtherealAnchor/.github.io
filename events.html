@@ -199,17 +199,12 @@
 
     <script>
         const totalWeeks = 8;
-        const weekDates = ["30 апр - 7 мая", "7-14 мая", "14-21 мая", "21-28 мая", "28 мая - 4 июн", "4-11 июня", "11-18 июня", "18-25 июня"];
+        const weekDates = ["25 июня - 3 июля", "3-10 июля", "10-17 июля", "17-24 июля", "24-31 июля", "21 июля - 7 авг", "7-14 августа", "14-21 авг"],
 
         let eventsList = [
-            { id: 1, title: '<span class="text-lg">Событие пополнения</span><span class="text-xs-custom">Задонатьте на 100 USD, чтобы получить до 3 штампов Виты/SIMP Терезы</span>', startWeek: 1, duration: 8, icon: "images/topup.png" },
-            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">120 кристаллов, стигмата на выбор для Брони</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
-            { id: 3, title: '<span class="text-lg">Проект Моря Данных: кризис диссертации</span><span class="text-xs-custom">Пройдите событие, чтобы получить наряд на Броню</span>', startWeek: 1, duration: 8, icon: "images/main.png" },
-            { id: 4, title: '<span class="text-lg">Наступает рассвет</span><span class="text-xs-custom">Выполняйте задания, чтобы получить Сенадину</span>', startWeek: 1, duration: 8, icon: "images/chara.png" },
-            { id: 5, title: '<span class="text-lg">Дебют главы 12 «С тобой, которую я никогда не знала»</span><span class="text-xs-custom">Получите больше наград во время дебюта</span>', startWeek: 3, duration: 6, icon: "images/ch.png" },
-            { id: 6, title: '<span class="text-lg">Повтор события «Звёздный вояж: контратака»</span>', startWeek: 5, duration: 4, icon: "images/starry.png" },
-            { id: 7, title: '<span class="text-lg">Усиленный дуэт</span>', startWeek: 7, duration: 2, icon: "images/duo.png" },
-            { id: 8, title: '<span class="text-lg">Особый класс Шиксала</span>', startWeek: 6, duration: 3, icon: "images/web.png" }
+            { id: 1, title: '<span class="text-lg">Событие траты кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
+            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">120 кристаллов, стигмата на выбор для Зеле</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
+            { id: 3, title: '<span class="text-lg">Предельная скорость: доставка</span><span class="text-xs-custom">Пройдите событие, чтобы получить наряд на Телему</span>', startWeek: 1, duration: 8, icon: "images/main.png" }
         ];
 
        function renderTable() {
