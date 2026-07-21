@@ -198,12 +198,13 @@
     </div>
 
     <script>
-        const totalWeeks = 8;
-        const weekDates = ["25 июня - 3 июля", "3-10 июля", "10-17 июля", "17-24 июля", "24-31 июля", "21 июля - 7 авг", "7-14 августа", "14-21 авг"];
+        const const totalWeeks = 9;
+        const weekDates = ["20-28 августа", "24 авг - 4 сен", "4-11 сентября", "11-18 сентября", "18-25 сентября", "25 сен - 2 окт", "2-9 октября", "9-16 октября", "16-22 октября"];
         let eventsList = [
-            { id: 1, title: '<span class="text-lg">Событие траты кристаллов</span>', startWeek: 1, duration: 6, icon: "images/spend.png" },
-            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">120 кристаллов, стигмата на выбор для Зеле</span>', startWeek: 1, duration: 8, icon: "images/login2.png" },
-            { id: 3, title: '<span class="text-lg">Предельная скорость: доставка</span><span class="text-xs-custom">Пройдите событие, чтобы получить наряд на Телему</span>', startWeek: 1, duration: 8, icon: "images/main.png" }
+            { id: 1, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">120 кристаллов, стигмата на выбор для Гаруды</span>', startWeek: 1, duration: 9, icon: "images/login.png" },
+            { id: 2, title: '<span class="text-lg">7-дневный бонус за вход</span><span class="text-xs-custom">300 кристаллов</span>', startWeek: 1, duration: 6, icon: "images/login2.png" },
+            { id: 3, title: '<span class="text-lg">Тайны корабля и дерева желаний</span>', startWeek: 1, duration: 9, icon: "images/main.png" },
+            { id: 2, title: '<span class="text-lg">8-дневный бонус за вход</span><span class="text-xs-custom">5 карт в баннер экипировки</span>', startWeek: 2, duration: 8, icon: "images/login3.png" }
         ];
 
        function renderTable() {
