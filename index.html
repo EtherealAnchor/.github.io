@@ -327,25 +327,26 @@
         const imageCache = new Map();
         const PROXIES = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url=", "https://api.codetabs.com/v1/proxy?quest="];
 
+        const fallbackImg = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
         async function fetchImageAsBase64(url) {
             if (!url || url.startsWith('data:')) return url;
             if (imageCache.has(url)) return imageCache.get(url);
 
-            // Если путь локальный (не начинается с http), загружаем напрямую
             if (!url.startsWith('http')) {
                 try {
                     const response = await fetch(url);
+                    if (!response.ok) throw new Error('Image not found');
                     const blob = await response.blob();
                     const b64 = await new Promise(r => { const f = new FileReader(); f.onloadend = () => r(f.result); f.readAsDataURL(blob); });
                     imageCache.set(url, b64);
                     return b64;
                 } catch(e) {
-                    console.warn("Не удалось конвертировать локальную картинку:", url);
-                    return url;
+                    console.warn("Не удалось загрузить локальную картинку (возможно 404):", url);
+                    return fallbackImg;
                 }
             }
 
-            // Если ссылка внешняя, используем прокси
             for (const proxy of PROXIES) {
                 try {
                     const response = await fetch(proxy + encodeURIComponent(url));
@@ -356,7 +357,8 @@
                     return b64;
                 } catch(e) {}
             }
-            return url;
+            console.warn("Не удалось загрузить внешнюю картинку через прокси:", url);
+            return fallbackImg;
         }
 
         async function preloadAllResources() {
@@ -410,9 +412,6 @@
 
             document.querySelectorAll('.supply-card').forEach(el => el.remove());
 
-            // Прозрачный 1x1 пиксель (Base64) в качестве фолбэка для сломанных картинок
-            const fallbackImg = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-            // Обработчик ошибки: если картинка не загружается (например, нет папки images/), подставляем заглушку
             const onErrorAttr = `onerror="this.onerror=null; this.src='${fallbackImg}';"`;
 
             for(const cat of categories){
@@ -471,7 +470,8 @@
                 const dataUrl = await window.htmlToImage.toPng(node, { 
                     pixelRatio: 3,
                     backgroundColor: '#FEF8F2',
-                    fontEmbedCSS: true
+                    fontEmbedCSS: true,
+                    imagePlaceholder: fallbackImg
                 });
                 const link = document.createElement('a');
                 link.download = `Schedule_v${currentVersion}.png`; 
