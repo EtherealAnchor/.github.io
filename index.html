@@ -261,37 +261,40 @@
     </div>
 
     <script>
-        const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Оператор", "Наряд", "Вознесение Валькирии", "Вознесение экипировки"];
+        const categories = ["Боевой костюм А", "Боевой костюм Б", "Экипировка А", "Экипировка Б", "Карнавал А", "Карнавал Б", "Оператор", "Наряд", "Вознесение Валькирии", "Вознесение экипировки"];
 
         const configs = {
             1: {
                 totalWeeks: 9,
-                weekDates: ["20-28 августа", "24 авг - 4 сен", "4-11 сентября", "11-18 сентября", "18-25 сентября", "25 сен - 2 окт", "2-9 октября", "9-16 октября", "16-22 октября"],
+                weekDates: ["22-30 октября", "30 окт - 6 нояб", "6-13 ноября", "13-20 ноября", "20-27 ноября", "27 нояб - 4 дек", "4-11 декабря", "11-18 декабря", "18-24 декабря"],
                 data: {
-                    "Боевой костюм А": [
+                    "Боевой костюм А": [{ title: '<span class="text-lg">Херршер Причинности</span><span class="text-md">Первые х10 бесплатны</span>', startWeek: 1, duration: 6, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2024/06/07/76321978/bf2e2800a7e90075d6b8e0fe637e1590_4588193668970104413.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/97/Core_Fire_DMG.png" } }
                         
                     ],
-                    "Боевой костюм Б": [{ title: '<span class="text-lg">Обманщица небес: тень рассвета</span>', startWeek: 1, duration: 9, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2024/06/07/76321978/bf2e2800a7e90075d6b8e0fe637e1590_4588193668970104413.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/09/Core_Physical.png" } }
-                                        
-            ],
+                    "Боевой костюм Б": [{ title: '<span class="text-lg">Заботливый доктор</span>', startWeek: 2, duration: 3, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/05/19/4976467/d69c42cb29495a1e67cd7bc20635b997_6487736939284488175.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/e/ed/Core_Lightning_DMG.png" } }          
+                    ],
                     "Экипировка А": [
-                        { title: '<span class="text-lg">Новая экипировка Гаруды</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/07/09/50494840/7491f863007120b321b58b4e7bf0472f_5991546283352778644.png"} }
+                        { title: '<span class="text-lg">Экипировка Херршера Причинности</span>', startWeek: 1, duration: 6, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/09/14/50494840/936df2f2804a02dfe9d3830e2bcb5232_6860201906766672642.png"} }
                     ],
                     "Экипировка Б": [
-                        { title: '<span class="text-md">Экипировка Сунцюэ</span>', startWeek: 1, duration: 9, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2024/06/14/50494840/abcd4ada99941f9e4009812456759873_3142150537535737340.png"} }
+                        { title: '<span class="text-md">Экипировка Зеле</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/05/16/50494840/b84398c9746c65d7bcb4e5473f9c5a38_6887261055274242587.png"} },
+                        {title: '<span class="text-lg">Экипировка Луны</span>', startWeek: 5, duration: 2, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2026/01/23/50494840/39823d668396a2abd57e0ad41733339d_2463711180311566959.png"} }
+                    ],
+                    "Карнавал А": [
+                        { title: '<span class="text-lg">Ротация баннеров</span>', startWeek: 2, duration: 3, icons: {extra: "https://act-upload.mihoyo.com/bh3-wiki/2026/07/09/50494840/7491f863007120b321b58b4e7bf0472f_5991546283352778644.png"} }
+                    ],
+                    "Карнавал Б": [
+                        { title: '<span class="text-lg">Ротация баннеров</span>', startWeek: 2, duration: 3, icons: {extra: "https://act-upload.mihoyo.com/bh3-wiki/2026/07/09/50494840/7491f863007120b321b58b4e7bf0472f_5991546283352778644.png"} }
                     ],
                     "Оператор": [
-                        { title: '<span class="text-lg">Сенадина</span><span class="text-md">За каждые 10 круток даёт 2 карты баннера экипировки, макс 12</span>', startWeek: 1, duration: 6, icons: { main: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/refs/heads/main/images/sena.png" } }
+                        { title: '<span class="text-lg">Сенадина > Ююн > Ченьсюэ > Тереза</span>', startWeek: 1, duration: 4, icons: { extra: "https://raw.githubusercontent.com/EtherealAnchor/.github.io/refs/heads/main/images/sena.png" } },
+                        { title: '<span class="text-ex">Сенадина</span>', startWeek: 5, duration: 2, icons: { main: "https://act-upload.mihoyo.com/bh3-wiki/2026/07/17/4976467/139c0d98b9b0f85e6b39f37e939c75c0_8871226519827663933.png" } }
                     ],
                     "Наряд": [
-                        { title: '<span class="text-ex">Журавль Тайсюаня</span><span class="text-md">9600 кристаллов</span>', startWeek: 2, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fa/Crane_of_Taixuan.png" } },
+                        { title: '<span class="text-ex">Обет, дарующий зарю</span><span class="text-md">9600 кристаллов</span>', startWeek: 1, duration: 3, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fa/Crane_of_Taixuan.png" } },
+                        { title: '<span class="text-lg">Молитвы зимы, новые мечтания</span><span class="text-md">9600 кристаллов</span>', startWeek: 4, duration: 2, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png" } },
+                        { title: '', startWeek: 6, duration: 1, icons: { main: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Wintery_Wishes.png" } }
                     ],
-                    "Вознесение Валькирии": [
-                        { title: '<span class="text-lg">Безумное наслаждение: тень приглашения</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2024/03/18/76321978/ca55c7106356e42821de0e4ddf2b28d2_1864316970363297404.png", rank: "images/Valkyrie_S.png", type: "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d7/Core_Ice_DMG.png"} }
-                        ],
-                        "Вознесение экипировки": [
-                        { title: '<span class="text-lg">Экипировка Телемы</span>', startWeek: 1, duration: 3, icons: {main: "https://act-upload.mihoyo.com/bh3-wiki/2024/03/16/50494840/8a70f8491e52988cfc37944df3af4a27_4125609499620936440.png"} }
-                        ],
                 }
             },
             2: {
